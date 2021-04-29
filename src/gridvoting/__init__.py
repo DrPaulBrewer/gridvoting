@@ -142,10 +142,13 @@ class VotingModel():
             df.plot.scatter('power','diff2',loglog=True)
             df.plot.scatter('power','sum1minus1')
             df.plot.scatter('power','sum2minus1')
-        print('no core, stationary distribution follows')
         z = self.stationary_distribution
-        grid.plot(z, points=voter_ideal_points)
-        grid.plot(z, points=voter_ideal_points, zoom=True)
+        if grid is None:
+            pd.Series(z).plot()
+        else:
+            grid.plot(z, points=voter_ideal_points)
+            if voter_ideal_points is not None:
+                grid.plot(z, points=voter_ideal_points, zoom=True)
 
     def _get_transition_matrix(self):
         utility_functions = self.utility_functions
