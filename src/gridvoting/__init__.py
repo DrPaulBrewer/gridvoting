@@ -210,7 +210,7 @@ class VotingModel():
         """returns array of size number_of_feasible_alternatives
         with value 1 where alternative beats current index by some majority"""
         assert(self.analyzed)
-        points = cp.asnumpy(self.MarkovChain.P[:, index] > 0).astype('int')
+        points = cp.asnumpy(self.MarkovChain.P[index, :] > 0).astype('int')
         points[index] = 0
         return points
 
@@ -218,7 +218,7 @@ class VotingModel():
         """returns array of size number_of_feasible_alternatives
         with value 1 where current index beats altetnative by some majority"""
         assert(self.analyzed)
-        points = cp.asnumpy(self.MarkovChain.P[index, :] > 0).astype('int')
+        points = cp.asnumpy(self.MarkovChain.P[:, index] > 0).astype('int')
         points[index] = 0
         return points
 
