@@ -31,6 +31,13 @@ class Grid:
         """returns [x,y] vectors for all grid points"""
         return np.column_stack((self.x, self.y))
 
+    def index(self, *, x, y):
+        """returns the unique 1D array index for grid point (x,y)"""
+        isSelectedPoint = (self.x == x) & (self.y == y)
+        indexes = np.flatnonzero((isSelectedPoint))
+        assert(len(indexes) == 1)
+        return indexes[0]
+
     def spatial_utilities(
         self,
         *,
@@ -198,6 +205,22 @@ class VotingModel():
             self.stationary_distribution = \
                 cp.asnumpy(self.MarkovChain.stationary_distribution)
         self.analyzed = True
+
+    def what_beats(self, *, index):
+        """returns array of size number_of_feasible_alternatives
+        with value 1 where alternative beats current index by some majority"""
+        assert(self.analyzed)
+        points = cp.asnumpy(self.MarkovChain.P[:, index] > 0).astype('int')
+        points[index] = 0
+        return points
+
+    def what_is_beaten_by(self, *, index):
+        """returns array of size number_of_feasible_alternatives
+        with value 1 where current index beats altetnative by some majority"""
+        assert(self.analyzed)
+        points = cp.asnumpy(self.MarkovChain.P[index, :] > 0).astype('int')
+        points[index] = 0
+        return points
 
     def plots(self, *, grid, voter_ideal_points, diagnostics=False):
         if self.core_exists:
