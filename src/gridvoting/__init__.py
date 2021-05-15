@@ -36,7 +36,7 @@ class Grid:
         """returns utility function values for each voter at each grid point"""
         return scale*cdist(voter_ideal_points,self.as_xy_vectors(),metric=metric)
 
-    def plot(self, z, *, cmap=cm.gray_r, alpha=0.6, alpha_points=0.3, log=True, points=None, border=1, zoom=False, figsize=(10,10)):
+    def plot(self, z, *, title=None, cmap=cm.gray_r, alpha=0.6, alpha_points=0.3, log=True, points=None, border=1, zoom=False, figsize=(10,10)):
         """plots values z defined on the grid; optionally plots additional 2D points and zooms to fit the bounding box of the points"""
         plt.figure(figsize=figsize)
         plt.rcParams["font.size"] = "24"
@@ -63,6 +63,8 @@ class Grid:
         plt.imshow(zplot, extent=extent, cmap=cmap, alpha=alpha)
         if points is not None:
             plt.scatter(points[:,0],points[:,1],alpha=alpha_points, color='black')
+        it title is not None:
+            plt.title(title)
         plt.show()
 
 class MarkovChainGPU():
@@ -70,7 +72,9 @@ class MarkovChainGPU():
         """initializes a MarkovChainGPU instance by copying in the transition matrix P and calculating chain properties"""
         self.P = cp.asarray(P) # transition matrix -- move to cudapy if necessary
         assert(self.P.shape[0]==self.P.shape[1]) # make sure transition matrix is square
-        self.absorbing_points = cp.equal(cp.diagonal(self.P),1.0)
+        diagP = cp.diagonal(self.P)
+        self.absorbing_points = cp.equal(diagP,1.0)
+        self.unreachable_points = cp.equal(cp.sum(self.P, axis=0),diagP)
         self.has_unique_stationary_distibution = not cp.any(self.absorbing_points)
         if computeNow and self.has_unique_stationary_distibution:
             self.find_unique_stationary_distribution()
@@ -142,13 +146,15 @@ class VotingModel():
             df.plot.scatter('power','diff2',loglog=True)
             df.plot.scatter('power','sum1minus1')
             df.plot.scatter('power','sum2minus1')
+            if grid is not None:
+                grid.plot(cp.asnumpy(self.MarkovChain.unreachable_points).astype('int'), title="dominated/unreachable points")
         z = self.stationary_distribution
         if grid is None:
             pd.Series(z).plot()
         else:
-            grid.plot(z, points=voter_ideal_points)
+            grid.plot(z, points=voter_ideal_points, title="stationary distribution")
             if voter_ideal_points is not None:
-                grid.plot(z, points=voter_ideal_points, zoom=True)
+                grid.plot(z, points=voter_ideal_points, zoom=True, title="stationary distribution")
 
     def _get_transition_matrix(self):
         utility_functions = self.utility_functions
