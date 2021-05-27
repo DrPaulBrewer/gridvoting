@@ -152,11 +152,11 @@ class MarkovChainGPU():
             power = power * 2
             c1 = cP_LT[check1]
             c2 = cP_LT[check2]
-            sum1 = cp.sum(c1)
-            sum2 = cp.sum(c2)
-            sum_absolute_differences = cp.sum(cp.abs(cp.subtract(c1, c2)))
-            diff1 = cp.sum(cp.abs(cp.subtract(cp.dot(c1, cP), c1)))
-            diff2 = cp.sum(cp.abs(cp.subtract(cp.dot(c2, cP), c2)))
+            sum1 = float(cp.sum(c1))
+            sum2 = float(cp.sum(c2))
+            sum_absolute_differences = float(cp.sum(cp.abs(cp.subtract(c1, c2))))
+            diff1 = float(cp.sum(cp.abs(cp.subtract(cp.dot(c1, cP), c1))))
+            diff2 = float(cp.sum(cp.abs(cp.subtract(cp.dot(c2, cP), c2))))
             diags['power'].append(power)
             diags['sum1minus1'].append(sum1-1.0)
             diags['sum2minus1'].append(sum2-1.0)
