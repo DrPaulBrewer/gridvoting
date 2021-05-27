@@ -150,21 +150,29 @@ class MarkovChainGPU():
         while unconverged:
             cP_LT = cp.linalg.matrix_power(cP_LT, 2)
             power = power * 2
-            c1 = cP_LT[check1]
-            c2 = cP_LT[check2]
-            sum1 = float(cp.sum(c1))
-            sum2 = float(cp.sum(c2))
-            sum_absolute_differences = float(cp.sum(cp.abs(cp.subtract(c1, c2))))
-            diff1 = float(cp.sum(cp.abs(cp.subtract(cp.dot(c1, cP), c1))))
-            diff2 = float(cp.sum(cp.abs(cp.subtract(cp.dot(c2, cP), c2))))
+            row1 = cP_LT[check1]
+            row2 = cP_LT[check2]
+            # cast to float is required because cp.sum yields a cp.cparray
+            # with zero dimensions instead of a scalar
+            #
+            # sum_..._ces = L1 norm of two different rows of P^power
+            sum_absolute_differences = float(cp.sum(cp.abs(row1 - row2)))
+            # diff1 = L1 norm of 1-step evolved row1 minus itself
+            diff1 = float(cp.sum(cp.abs(cp.dot(row1, cP) - row1)))
+            # diff2 = L1 norm of 1-step evolved row2 minus itself
+            diff2 = float(cp.sum(cp.abs(cp.dot(row2, cP) - row2)))
+            # sum1 = sum of row1, which should be 1.0
+            sum1 = float(cp.sum(row1))
+            # sum2 = sum of row2, which should be 1.0
+            sum2 = float(cp.sum(row2))
+            diags['sad'].append(sum_absolute_differences)
             diags['power'].append(power)
-            diags['sum1minus1'].append(sum1-1.0)
-            diags['sum2minus1'].append(sum2-1.0)
             diags['diff1'].append(diff1)
             diags['diff2'].append(diff2)
-            diags['sad'].append(sum_absolute_differences)
+            diags['sum1minus1'].append(sum1-1.0)
+            diags['sum2minus1'].append(sum2-1.0)
             unconverged = (sum_absolute_differences > tolerance)
-        self.stationary_distribution = cp.copy(c1 if diff1 < diff2 else c2)
+        self.stationary_distribution = cp.copy(row1 if diff1 < diff2 else row2)
         self.power = power
         self.stationary_diagnostics = diags
         del cP_LT
@@ -222,44 +230,61 @@ class VotingModel():
         points[index] = 0
         return points
 
-    def plots(self, *, grid, voter_ideal_points, diagnostics=False):
+    def plots(
+        self,
+        *,
+        grid,
+        voter_ideal_points,
+        diagnostics=False,
+        title_core='Core (aborbing) points',
+        title_sad='L1 norm of difference in two rows of P^power',
+        title_diff1='L1 norm of change in row1 (grid corner)',
+        title_diff2='L1 norm of change in middle row (grid center)',
+        title_sum1minus1='Sum of row1 (grid corner), minus 1.0',
+        title_sum2minus1='Sum of middle row (grid center), minus 1.0',
+        title_unreachable_points='Dominated (unreachable) points',
+        title_stationary_distribution_no_grid='Stationary Distribution',
+        title_stationary_distribution='Stationary Distribution',
+        title_stationary_distribution_zoom='Stationary Distribution (zoom)'
+    ):
         if self.core_exists:
             print("core plot")
             grid.plot(
                 self.core_points.astype('int'),
                 points=voter_ideal_points,
-                zoom=True
+                zoom=True,
+                title=title_core
             )
             return
         if diagnostics:
             df = pd.DataFrame(self.MarkovChain.stationary_diagnostics)
-            df.plot.scatter('power', 'sad', loglog=True)
-            df.plot.scatter('power', 'diff1', loglog=True)
-            df.plot.scatter('power', 'diff2', loglog=True)
-            df.plot.scatter('power', 'sum1minus1')
-            df.plot.scatter('power', 'sum2minus1')
+            df.plot.scatter('power', 'sad', loglog=True, title=title_sad)
+            df.plot.scatter('power', 'diff1', loglog=True, title=title_diff1)
+            df.plot.scatter('power', 'diff2', loglog=True, title=title_diff2)
+            df.plot.scatter('power', 'sum1minus1', title=title_sum1minus1)
+            df.plot.scatter('power', 'sum2minus1', title=title_sum2minus1)
             if grid is not None:
                 grid.plot(
                     cp
                     .asnumpy(self.MarkovChain.unreachable_points)
                     .astype('int'),
-                    title="dominated/unreachable points"
+                    title=title_unreachable_points
                 )
         z = self.stationary_distribution
         if grid is None:
-            pd.Series(z).plot()
+            pd.Series(z).plot(title=title_stationary_distribution_no_grid)
         else:
             grid.plot(
                 z,
                 points=voter_ideal_points,
-                title="stationary distribution"
+                title=title_stationary_distribution
             )
             if voter_ideal_points is not None:
                 grid.plot(
                     z,
                     points=voter_ideal_points,
                     zoom=True,
-                    title="stationary distribution"
+                    title=title_stationary_distribution_zoom
                 )
 
     def _get_transition_matrix(self):
