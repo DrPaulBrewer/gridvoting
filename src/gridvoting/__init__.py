@@ -156,11 +156,11 @@ class MarkovChainGPU():
             # with zero dimensions instead of a scalar
             #
             # sum_..._ces = L1 norm of two different rows of P^power
-            sum_absolute_differences = float(cp.sum(cp.abs(row1 - row2)))
+            sum_absolute_differences = float(cp.linalg.norm(row1 - row2, ord=1))
             # diff1 = L1 norm of 1-step evolved row1 minus itself
-            diff1 = float(cp.sum(cp.abs(cp.dot(row1, cP) - row1)))
+            diff1 = float(cp.linalg.norm(cp.dot(row1, cP) - row1, ord=1))
             # diff2 = L1 norm of 1-step evolved row2 minus itself
-            diff2 = float(cp.sum(cp.abs(cp.dot(row2, cP) - row2)))
+            diff2 = float(cp.linalg.norm(cp.dot(row2, cP) - row2, ord=1))
             # sum1 = sum of row1, which should be 1.0
             sum1 = float(cp.sum(row1))
             # sum2 = sum of row2, which should be 1.0
@@ -172,6 +172,7 @@ class MarkovChainGPU():
             diags['sum1minus1'].append(sum1-1.0)
             diags['sum2minus1'].append(sum2-1.0)
             unconverged = (sum_absolute_differences > tolerance)
+                
         self.stationary_distribution = cp.copy(row1 if diff1 < diff2 else row2)
         self.power = power
         self.stationary_diagnostics = diags
