@@ -352,14 +352,18 @@ class VotingModel():
 class CondorcetCycle(VotingModel):
 
     def __init__(self, *,  zi):
-        super.__init__(
+        # docs suggest to call superclass directly
+        # instead of using super()
+        # https://docs.python.org/3/tutorial/classes.html#inheritance
+        VotingModel.__init__(
+            self,
             zi=zi,
             number_of_voters=3,
             majority=2,
             number_of_feasible_alternatives=3,
-            utility_functions=[
+            utility_functions=np.array([
                 [3, 2, 1],  # first agent prefers A>B>C
                 [1, 3, 2],  # second agent prefers B>C>A
                 [2, 1, 3]   # third agents prefers C>A>B
-            ]
+            ])
         )
