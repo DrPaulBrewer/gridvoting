@@ -108,24 +108,47 @@ class Grid:
         plt.show()
 
 
+def assert_valid_transition_matrix(P, *, decimal=10):
+    """ asserts that numpy or cupy array is square and that each row sums to 1.0
+        with default tolerance of 10 decimal places"""
+    rows, cols = P.shape
+    assert rows == cols
+    xp = cp.get_array_module(P)
+    xp.testing.assert_array_almost_equal(
+        P.sum(axis=1),
+        xp.ones(shape=(rows)), decimal
+    )
+
+
+def assert_zero_diagonal_int_matrix(M):
+    """ assers that numpy or cupy array is square and the diagonal is 0.0 """
+    rows, cols = M.shape
+    assert rows == cols
+    xp = cp.get_array_module(M)
+    xp.testing.assert_array_equal(
+        xp.diagonal(M),
+        xp.zeros(shape=(rows), dtype=int)
+    )
+
+
 class MarkovChainGPU():
-    def __init__(self, *, P, computeNow=True):
-        """initializes a MarkovChainGPU instance by
-         copying in the transition matrix P and calculating chain properties"""
+    def __init__(self, *, P, computeNow=True, tolerance=1e-10):
+        """initializes a MarkovChainGPU instance by copying in the transition
+        matrix P and calculating chain properties"""
         self.P = cp.asarray(P)  # copy transition matrix to cudapy as necessary
-        assert(self.P.shape[0] == self.P.shape[1])  # matrix must be square
+        assert_valid_transition_matrix(P)
         diagP = cp.diagonal(self.P)
         self.absorbing_points = cp.equal(diagP, 1.0)
         self.unreachable_points = cp.equal(cp.sum(self.P, axis=0), diagP)
         self.has_unique_stationary_distibution = \
             not cp.any(self.absorbing_points)
         if computeNow and self.has_unique_stationary_distibution:
-            self.find_unique_stationary_distribution()
+            self.find_unique_stationary_distribution(tolerance=tolerance)
 
     def find_unique_stationary_distribution(
         self,
         *,
-        tolerance=1e-10,
+        tolerance,
         start_power=2
     ):
         """finds the stationary distribution for a Markov Chain by
@@ -192,8 +215,8 @@ class VotingModel():
         """initializes a VotingModel with utility_functions for each voter,
         the number_of_voters,
         the number_of_feasible_alternatives,
-        the majority size, and whether to use zi (fully random) or
-        intelligent challenges (random over winning set+status quo)"""
+        the majority size, and whether to use zi fully random agenda or
+        intelligent challengers random over winning set+status quo"""
         assert(
             utility_functions.shape ==
             (number_of_voters, number_of_feasible_alternatives)
@@ -304,12 +327,8 @@ class VotingModel():
                 total_votes_for_challenger_when_status_quo_is_a,
                 majority
             ).astype('int')
-        cp.testing.assert_array_equal(
-            cp.diagonal(cV),
-            cp.zeros(shape=(nfa), dtype=int)
-        )
+        assert_zero_diagonal_int_matrix(cV)
         cV_sum_of_row = cV.sum(axis=1)
-        assert(cV_sum_of_row.shape == (nfa,))
         # diagonal will be set to reflect count of the losing challengers,
         # and self-challenge, equally likely with winning challengers
         if zi:
@@ -325,8 +344,20 @@ class VotingModel():
                 cp.add(cV, cp.eye(nfa)),
                 (1+cV_sum_of_row)[:, cp.newaxis]
             )
-        cp.testing.assert_array_almost_equal(
-            cP.sum(axis=1),
-            cp.ones(shape=(nfa)), decimal=10
-        )
+        assert_valid_transition_matrix(cP)
         return cP
+
+
+class CondorcetCycle(VotingModel):
+
+    def __init__(*, zi):
+        super.__init__(
+            number_of_voters=3,
+            majority=2,
+            number_of_feasible_alternatives=3,
+            utility_functions=[
+                [3, 2, 1],  # first agent prefers A>B>C
+                [1, 3, 2],  # second agent prefers B>C>A
+                [2, 1, 3]   # third agents prefers C>A>B
+            ]
+        )
