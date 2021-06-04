@@ -351,8 +351,9 @@ class VotingModel():
 
 class CondorcetCycle(VotingModel):
 
-    def __init__(*, zi):
+    def __init__(self, *,  zi):
         super.__init__(
+            zi=zi,
             number_of_voters=3,
             majority=2,
             number_of_feasible_alternatives=3,
