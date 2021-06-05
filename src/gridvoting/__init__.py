@@ -145,6 +145,27 @@ class MarkovChainGPU():
         if computeNow and self.has_unique_stationary_distibution:
             self.find_unique_stationary_distribution(tolerance=tolerance)
 
+    def L1_norm_of_single_step_change(self, x):
+        """returns float(L1(xP-x))"""
+        return float(cp.linalg.norm(cp.dot(x, self.P) - x, ord=1))
+
+    def solve_for_unit_eigenvector(self):
+        """This is another way to potentially find the stationary distribution,
+        but can suffer from numerical irregularities like negative entries.
+        Assumes eigenvalue of 1.0 exists and solves for the eigenvector by
+        considering a related matrix equation Q v = b, where:
+        Q is P transpose minus the identity matrix I, with the first row
+        replaced by all ones for the vector scaling requirement;
+        v is the eigenvector of eigenvalue 1 to be found; and
+        b is the first basis vector, where b[0]=1 and 0 elsewhere."""
+        n = self.P.shape[0]
+        Q = cp.transpose(self.P)-cp.eye(n)
+        Q[0] = cp.ones(n)
+        b = cp.zeros(n)
+        b[0] = 1.0
+        self.unit_eigenvector = cp.linalg.solve(Q, b)
+        return self.unit_eigenvector
+
     def find_unique_stationary_distribution(
         self,
         *,
@@ -179,24 +200,29 @@ class MarkovChainGPU():
             # with zero dimensions instead of a scalar
             #
             # sum_..._ces = L1 norm of two different rows of P^power
-            sum_absolute_differences = float(cp.linalg.norm(row1 - row2, ord=1))
+            sum_absolute_diff = float(cp.linalg.norm(row1 - row2, ord=1))
             # diff1 = L1 norm of 1-step evolved row1 minus itself
-            diff1 = float(cp.linalg.norm(cp.dot(row1, cP) - row1, ord=1))
+            diff1 = self.L1_norm_of_single_step_change(row1)
             # diff2 = L1 norm of 1-step evolved row2 minus itself
-            diff2 = float(cp.linalg.norm(cp.dot(row2, cP) - row2, ord=1))
+            diff2 = self.L1_norm_of_single_step_change(row2)
             # sum1 = sum of row1, which should be 1.0
             sum1 = float(cp.sum(row1))
             # sum2 = sum of row2, which should be 1.0
             sum2 = float(cp.sum(row2))
-            diags['sad'].append(sum_absolute_differences)
+            diags['sad'].append(sum_absolute_diff)
             diags['power'].append(power)
             diags['diff1'].append(diff1)
             diags['diff2'].append(diff2)
             diags['sum1minus1'].append(sum1-1.0)
             diags['sum2minus1'].append(sum2-1.0)
-            unconverged = (sum_absolute_differences > tolerance)
-                
-        self.stationary_distribution = cp.copy(row1 if diff1 < diff2 else row2)
+            unconverged = (sum_absolute_diff > tolerance)
+            if not unconverged:
+                # we know 2 rows are close together so check all rows
+                # when taking L1 norm sum the cols in each row, so axis=1
+                all_L1_norms = cp.linalg.norm(cP_LT - row1, axis=1, ord=1)
+                unconverged = (cp.max(all_L1_norms) > tolerance)
+
+        self.stationary_distribution = cp.average(cP_LT, axis=0)  # sum rows
         self.power = power
         self.stationary_diagnostics = diags
         del cP_LT
