@@ -223,7 +223,7 @@ class MarkovChainGPU():
                 self.check_norm = self.L1_norm_of_single_step_change(
                     self.stationary_distribution
                 )
-                unconverged = (check_norm > tolerance)
+                unconverged = (self.check_norm > tolerance)
          
         self.power = power
         self.stationary_diagnostics = diags
