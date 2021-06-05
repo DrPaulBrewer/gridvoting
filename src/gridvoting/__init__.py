@@ -217,12 +217,14 @@ class MarkovChainGPU():
             diags['sum2minus1'].append(sum2-1.0)
             unconverged = (sum_absolute_diff > tolerance)
             if not unconverged:
-                # we know 2 rows are close together so check all rows
-                # when taking L1 norm sum the cols in each row, so axis=1
-                all_L1_norms = cp.linalg.norm(cP_LT - row1, axis=1, ord=1)
-                unconverged = (cp.max(all_L1_norms) > tolerance)
-
-        self.stationary_distribution = cp.average(cP_LT, axis=0)  # sum rows
+                # these extra steps are taken when there is a possible solution
+                self.stationary_distribution = cp.average(cP_LT, axis=0)  # avg rows
+                # double check the solution via an L1 norm
+                self.check_norm = self.L1_norm_of_single_step_change(
+                    self.stationary_distribution
+                )
+                unconverged = (check_norm > tolerance)
+         
         self.power = power
         self.stationary_diagnostics = diags
         del cP_LT
