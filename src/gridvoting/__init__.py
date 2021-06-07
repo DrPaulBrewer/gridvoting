@@ -91,6 +91,7 @@ class Grid:
          and zooms to fit the bounding box of the points"""
         plt.figure(figsize=figsize)
         plt.rcParams["font.size"] = "24"
+        fmt = "%1.2f" if log else "%.2e"
         if zoom:
             assert(points.shape[0] > 2)
             assert(points.shape[1] == 2)
@@ -114,7 +115,7 @@ class Grid:
             y = self.y.reshape(zshape)
         zplot = np.log10(logbias+zraw) if log else zraw
         contours = plt.contour(x, y, zplot, extent=extent, cmap=cmap)
-        plt.clabel(contours, inline=True, fontsize=12, fmt='%1.3f')
+        plt.clabel(contours, inline=True, fontsize=12, fmt=fmt)
         plt.imshow(zplot, extent=extent, cmap=cmap, alpha=alpha)
         if points is not None:
             plt.scatter(
