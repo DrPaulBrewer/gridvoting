@@ -38,6 +38,25 @@ class Grid:
         assert(len(indexes) == 1)
         return indexes[0]
 
+    def embedding(self, *, valid):
+        """
+        returns an embedding function efunc from 1D arrays of size sum(valid)
+        to arrays of size self.len
+
+        valid is a np.array of type boolean, of size self.len
+        """
+        image_len = self.len
+        assert(image_len == len(valid))
+        correct_z_len = valid.sum()
+
+        def efunc(z):
+            assert(len(z) == correct_z_len)
+            v = np.zeros(image_len)
+            v[valid] = z
+            return v
+
+        return efunc
+
     def spatial_utilities(
         self,
         *,
@@ -62,8 +81,9 @@ class Grid:
         alpha_points=0.3,
         log=True,
         points=None,
-        border=1,
         zoom=False,
+        border=1,
+        logbias=1e-100,
         figsize=(10, 10)
     ):
         """plots values z defined on the grid;
@@ -92,7 +112,7 @@ class Grid:
             zraw = z.reshape(zshape)
             x = self.x.reshape(zshape)
             y = self.y.reshape(zshape)
-        zplot = np.log10((1e-20)+zraw) if log else zraw
+        zplot = np.log10(logbias+zraw) if log else zraw
         contours = plt.contour(x, y, zplot, extent=extent, cmap=cmap)
         plt.clabel(contours, inline=True, fontsize=12, fmt='%1.2f')
         plt.imshow(zplot, extent=extent, cmap=cmap, alpha=alpha)
@@ -289,6 +309,8 @@ class VotingModel():
         grid,
         voter_ideal_points,
         diagnostics=False,
+        embedding=lambda z: z,
+        zoomborder=0,
         title_core='Core (aborbing) points',
         title_sad='L1 norm of difference in two rows of P^power',
         title_diff1='L1 norm of change in row1 (grid corner)',
@@ -303,12 +325,12 @@ class VotingModel():
         if self.core_exists:
             print("core plot")
             grid.plot(
-                self.core_points.astype('int'),
+                embedding(self.core_points.astype('int')),
                 points=voter_ideal_points,
                 zoom=True,
                 title=title_core
             )
-            return
+            return None
         if diagnostics:
             df = pd.DataFrame(self.MarkovChain.stationary_diagnostics)
             df.plot.scatter('power', 'sad', loglog=True, title=title_sad)
@@ -318,9 +340,11 @@ class VotingModel():
             df.plot.scatter('power', 'sum2minus1', title=title_sum2minus1)
             if grid is not None:
                 grid.plot(
-                    cp
-                    .asnumpy(self.MarkovChain.unreachable_points)
-                    .astype('int'),
+                    embedding(
+                        cp
+                        .asnumpy(self.MarkovChain.unreachable_points)
+                        .astype('int'),
+                    ),
                     title=title_unreachable_points
                 )
         z = self.stationary_distribution
@@ -328,15 +352,16 @@ class VotingModel():
             pd.Series(z).plot(title=title_stationary_distribution_no_grid)
         else:
             grid.plot(
-                z,
+                embedding(z),
                 points=voter_ideal_points,
                 title=title_stationary_distribution
             )
             if voter_ideal_points is not None:
                 grid.plot(
-                    z,
+                    embedding(z),
                     points=voter_ideal_points,
                     zoom=True,
+                    border=zoomborder,
                     title=title_stationary_distribution_zoom
                 )
 
