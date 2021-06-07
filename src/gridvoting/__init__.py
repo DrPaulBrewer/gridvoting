@@ -114,7 +114,7 @@ class Grid:
             y = self.y.reshape(zshape)
         zplot = np.log10(logbias+zraw) if log else zraw
         contours = plt.contour(x, y, zplot, extent=extent, cmap=cmap)
-        plt.clabel(contours, inline=True, fontsize=12, fmt='%1.2f')
+        plt.clabel(contours, inline=True, fontsize=12, fmt='%1.3f')
         plt.imshow(zplot, extent=extent, cmap=cmap, alpha=alpha)
         if points is not None:
             plt.scatter(
@@ -309,6 +309,7 @@ class VotingModel():
         grid,
         voter_ideal_points,
         diagnostics=False,
+        log=True,
         embedding=lambda z: z,
         zoomborder=0,
         title_core='Core (aborbing) points',
@@ -326,6 +327,7 @@ class VotingModel():
             print("core plot")
             grid.plot(
                 embedding(self.core_points.astype('int')),
+                log=log,
                 points=voter_ideal_points,
                 zoom=True,
                 title=title_core
@@ -345,6 +347,7 @@ class VotingModel():
                         .asnumpy(self.MarkovChain.unreachable_points)
                         .astype('int'),
                     ),
+                    log=log,
                     title=title_unreachable_points
                 )
         z = self.stationary_distribution
@@ -353,12 +356,14 @@ class VotingModel():
         else:
             grid.plot(
                 embedding(z),
+                log=log,
                 points=voter_ideal_points,
                 title=title_stationary_distribution
             )
             if voter_ideal_points is not None:
                 grid.plot(
                     embedding(z),
+                    log=log,
                     points=voter_ideal_points,
                     zoom=True,
                     border=zoomborder,
