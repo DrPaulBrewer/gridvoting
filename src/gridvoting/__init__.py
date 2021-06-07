@@ -218,13 +218,14 @@ class MarkovChainGPU():
             unconverged = (sum_absolute_diff > tolerance)
             if not unconverged:
                 # these extra steps are taken when there is a possible solution
-                self.stationary_distribution = cp.average(cP_LT, axis=0)  # avg rows
+                # use an average over all the rows to collapse cp_LT
+                self.stationary_distribution = cp.average(cP_LT, axis=0)
                 # double check the solution via an L1 norm
                 self.check_norm = self.L1_norm_of_single_step_change(
                     self.stationary_distribution
                 )
                 unconverged = (self.check_norm > tolerance)
-         
+
         self.power = power
         self.stationary_diagnostics = diags
         del cP_LT
