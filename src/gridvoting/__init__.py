@@ -84,12 +84,14 @@ class Grid:
         zoom=False,
         border=1,
         logbias=1e-100,
-        figsize=(10, 10)
+        figsize=(10, 10),
+        dpi=72,
+        fname=None
     ):
         """plots values z defined on the grid;
         optionally plots additional 2D points
          and zooms to fit the bounding box of the points"""
-        plt.figure(figsize=figsize)
+        plt.figure(figsize=figsize, dpi=dpi)
         plt.rcParams["font.size"] = "24"
         fmt = "%1.2f" if log else "%.2e"
         if zoom:
@@ -126,7 +128,10 @@ class Grid:
             )
         if title is not None:
             plt.title(title)
-        plt.show()
+        if fname is None:
+            plt.show()
+        else:
+            plt.savefig(fname)
 
 
 def assert_valid_transition_matrix(P, *, decimal=10):
@@ -313,6 +318,9 @@ class VotingModel():
         log=True,
         embedding=lambda z: z,
         zoomborder=0,
+        dpi=72,
+        figsize=(10, 10),
+        fprefix=None,
         title_core='Core (aborbing) points',
         title_sad='L1 norm of difference in two rows of P^power',
         title_diff1='L1 norm of change in row1 (grid corner)',
@@ -324,23 +332,52 @@ class VotingModel():
         title_stationary_distribution='Stationary Distribution',
         title_stationary_distribution_zoom='Stationary Distribution (zoom)'
     ):
+        def _fn(name):
+            return None if fprefix is None else fprefix+name
+
+        def _save(fname):
+            if fprefix is not None:
+                plt.savefig(fprefix+fname)
+
         if self.core_exists:
-            print("core plot")
             grid.plot(
                 embedding(self.core_points.astype('int')),
                 log=log,
                 points=voter_ideal_points,
                 zoom=True,
-                title=title_core
+                title=title_core,
+                dpi=dpi,
+                figsize=figsize,
+                fname=_fn("core.png")
             )
-            return None
+            return None  # when core exists abort as additional plots undefined
         if diagnostics:
             df = pd.DataFrame(self.MarkovChain.stationary_diagnostics)
-            df.plot.scatter('power', 'sad', loglog=True, title=title_sad)
-            df.plot.scatter('power', 'diff1', loglog=True, title=title_diff1)
-            df.plot.scatter('power', 'diff2', loglog=True, title=title_diff2)
-            df.plot.scatter('power', 'sum1minus1', title=title_sum1minus1)
-            df.plot.scatter('power', 'sum2minus1', title=title_sum2minus1)
+            df.plot.scatter(
+                'power', 'sad', loglog=True,
+                title=title_sad, figsize=figsize
+            )
+            _save("diagnostic_sad.png")
+            df.plot.scatter(
+                'power', 'diff1', loglog=True,
+                title=title_diff1, figsize=figsize
+            )
+            _save("diagnostic_diff1.png")
+            df.plot.scatter(
+                'power', 'diff2', loglog=True,
+                title=title_diff2, figsize=figsize
+            )
+            _save("diagnostic_diff2.png")
+            df.plot.scatter(
+                'power', 'sum1minus1', logx=True,
+                title=title_sum1minus1, figsize=figsize
+            )
+            _save("diagnostic_sum1minus1.png")
+            df.plot.scatter(
+                'power', 'sum2minus1', logx=True,
+                title=title_sum2minus1, figsize=figsize
+            )
+            _save("diagnostic_sum2minuis1.png")
             if grid is not None:
                 grid.plot(
                     embedding(
@@ -349,17 +386,27 @@ class VotingModel():
                         .astype('int'),
                     ),
                     log=log,
-                    title=title_unreachable_points
+                    title=title_unreachable_points,
+                    dpi=dpi,
+                    figsize=figsize,
+                    fname=_fn("unreachable.png")
                 )
         z = self.stationary_distribution
         if grid is None:
-            pd.Series(z).plot(title=title_stationary_distribution_no_grid)
+            pd.Series(z).plot(
+                title=title_stationary_distribution_no_grid,
+                figsize=figsize
+            )
+            _save("stationary_distribubtion_no_grid.png")
         else:
             grid.plot(
                 embedding(z),
                 log=log,
                 points=voter_ideal_points,
-                title=title_stationary_distribution
+                title=title_stationary_distribution,
+                figsize=figsize,
+                dpi=dpi,
+                fname=_fn("stationary_distribution.png")
             )
             if voter_ideal_points is not None:
                 grid.plot(
@@ -368,7 +415,10 @@ class VotingModel():
                     points=voter_ideal_points,
                     zoom=True,
                     border=zoomborder,
-                    title=title_stationary_distribution_zoom
+                    title=title_stationary_distribution_zoom,
+                    figsize=figsize,
+                    dpi=dpi,
+                    fname=_fn("stationary_distribution_zoom.png")
                 )
 
     def _get_transition_matrix(self):
@@ -389,9 +439,8 @@ class VotingModel():
                 majority
             ).astype('int')
         assert_zero_diagonal_int_matrix(cV)
-        cV_sum_of_row = cV.sum(axis=1)
-        # diagonal will be set to reflect count of the losing challengers,
-        # and self-challenge, equally likely with winning challengers
+        cV_sum_of_row = cV.sum(axis=1)  # sum up all col for each row
+        # set up the ZI and MI transiation matrices
         if zi:
             cP = cp.divide(
                 cp.add(
