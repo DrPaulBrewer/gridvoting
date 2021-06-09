@@ -377,7 +377,7 @@ class VotingModel():
                 'power', 'sum2minus1', logx=True,
                 title=title_sum2minus1, figsize=figsize
             )
-            _save("diagnostic_sum2minuis1.png")
+            _save("diagnostic_sum2minus1.png")
             if grid is not None:
                 grid.plot(
                     embedding(
