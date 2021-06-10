@@ -38,15 +38,17 @@ class Grid:
         assert(len(indexes) == 1)
         return indexes[0]
 
-    def embedding(self, *, valid, fill=0):
+    def embedding(self, *, valid, fill=0.0):
         """
         returns an embedding function efunc from 1D arrays of size sum(valid)
         to arrays of size self.len
 
         valid is a np.array of type boolean, of size self.len
 
-        fill is the value for indices outside the embedding.  The default
-        is zero (0), but can be set to np.nan (for matplotlib) or other values.
+        fill is the value for indices outside the embedding. The default
+        is zero (0.0).  Setting fill=np.nan can be useful for
+        plotting purposes as matplotlib will omit np.nan values from various
+        kinds of plots.
         """
 
         assert(self.len == len(valid))
