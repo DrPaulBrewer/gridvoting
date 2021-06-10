@@ -38,20 +38,23 @@ class Grid:
         assert(len(indexes) == 1)
         return indexes[0]
 
-    def embedding(self, *, valid):
+    def embedding(self, *, valid, fill=0):
         """
         returns an embedding function efunc from 1D arrays of size sum(valid)
         to arrays of size self.len
 
         valid is a np.array of type boolean, of size self.len
+
+        fill is the value for indices outside the embedding.  The default
+        is zero (0), but can be set to np.nan (for matplotlib) or other values.
         """
-        image_len = self.len
-        assert(image_len == len(valid))
+
+        assert(self.len == len(valid))
         correct_z_len = valid.sum()
 
         def efunc(z):
             assert(len(z) == correct_z_len)
-            v = np.zeros(image_len)
+            v = np.full(self.len, fill)
             v[valid] = z
             return v
 
