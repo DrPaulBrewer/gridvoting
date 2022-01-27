@@ -152,7 +152,7 @@ def assert_valid_transition_matrix(P, *, decimal=10):
 
 
 def assert_zero_diagonal_int_matrix(M):
-    """ assers that numpy or cupy array is square and the diagonal is 0.0 """
+    """ asserts that numpy or cupy array is square and the diagonal is 0.0 """
     rows, cols = M.shape
     assert rows == cols
     xp = cp.get_array_module(M)
@@ -308,7 +308,7 @@ class VotingModel():
 
     def what_is_beaten_by(self, *, index):
         """returns array of size number_of_feasible_alternatives
-        with value 1 where current index beats altetnative by some majority"""
+        with value 1 where current index beats alternative by some majority"""
         assert(self.analyzed)
         points = cp.asnumpy(self.MarkovChain.P[:, index] > 0).astype('int')
         points[index] = 0
