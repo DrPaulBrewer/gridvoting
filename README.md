@@ -18,3 +18,4 @@ Outputs:
 * Existence of core (absorbing) points
 * Stationary distributions (no core)
 * Diagnostic and distribution plots
+* extra
