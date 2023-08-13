@@ -58,10 +58,11 @@ winning alternatives given the status quo `f[t]`.
 
 The `VotingModel` class manages simulations.  Each simulation is an instance of `VotingModel`.
 Besides plotting and simple questions about the alternatives, the class also provides code
-for calculating the transition matrix needed as an input to the `MarkovChainGPU` class below.
+for calculating the transition matrix and providing it as an input to the `MarkovChainGPU` class below.
 
 The `Grid` class manages rectangular grids. An instance of `VotingModel` will usually specify
-an instance of grid for plotting or visualization purposes, but it is not strictly necessary.
+a Grid instance for plotting or visualization purposes.  It is also possible to use `VotingModel`
+without specifying any kind of grid or coordinate mapping, for an example see class `CondorcetCycle`.
 
 The `MarkovChainGPU` class manages a Markov Chain calulation on a GPU.  This class is called 
 internally from `VotingModel`.  The class contains two methods for calculating the 
