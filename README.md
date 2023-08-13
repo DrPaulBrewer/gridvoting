@@ -23,7 +23,7 @@ there are currently no automated tests.
 We used [Google Colab](https://colab.google), a cloud-based service that runs Python-based analyses on Google's servers and GPUs,
 for conducting most of the research reported in the publication above.  When using Google Colab, the local computer does NOT need to have a GPU.
 
-The software has also been tested (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
+The software has also run (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
 
 ## requirements
 * NVIDIA GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
