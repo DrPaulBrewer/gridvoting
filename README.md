@@ -26,7 +26,8 @@ for conducting most of the research reported in the publication above.  When usi
 The software has also run (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
 
 ## requirements
-* NVIDIA GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
+* Nvidia GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
+* Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
 * Python 3 
 * **all** of these Python 3 scientific computing modules (all except cupy are pre-installed on Google Colab, and [cupy can be installed from these instructions](https://docs.cupy.dev/en/stable/install.html)):
   - numpy
@@ -34,7 +35,6 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
   - matplotlib
   - scipy
   - cupy
-* Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
 * familiarity with Python language / scientific computing / gpu Nvidia-CUDA setup
 
 ## Random sequential voting simulations
