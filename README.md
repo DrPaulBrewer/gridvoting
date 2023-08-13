@@ -1,22 +1,44 @@
 # gridvoting
 
-This software helps set up, calculate, and plot stationary probability distributions for
-sequential voting simulations (with ZI or MI random challengers) that take place on a 2D grid of feasible outcomes.
-
-This software generated data for our [research publication](https://doi.org/10.1007/s11403-023-00387-8):
+This software is a library module for our [research publication (open-access)](https://doi.org/10.1007/s11403-023-00387-8):
 <pre>
   Brewer, P., Juybari, J. & Moberly, R. 
   A comparison of zero- and minimal-intelligence agendas in majority-rule voting models. 
   J Econ Interact Coord (2023). https://doi.org/10.1007/s11403-023-00387-8
 </pre>
 
-You are welcome to try the software, read it, copy it, and adapt it to your
-needs. If you change the software, be sure to change the module name somehow so that
+This software helps set up, calculate, and plot stationary probability distributions for
+sequential voting simulations (with ZI or MI random challengers) that take place on a 2D grid of feasible outcomes.
+
+In our paper, we used the simulations to show that adding intelligence to the agenda of a collection of voting bots does not necessarily
+improve the fairness or reasonableness of outcomes.
+
+## License
+
+The software is provided under the standard [MIT License](./LICENSE.md). 
+
+You are welcome to try the software, read it, copy it, adapt it to your
+needs, and redistribute your adaptations. If you change the software, be sure to change the module name somehow so that
 others know it is not the original.  See the LICENSE file for more details.  
 
+## Disclaimers
+
 The software is provided in the hope that it may be useful to others, but it is not a full featured turnkey
-system for conducting arbitrary voting simulations. While some manual tests have been done, 
-there are currently no automated tests.  
+system for conducting arbitrary voting simulations. Additional coding is required to define a specific simulation.
+Also, we do not include an automated test suite because our free testing provider does not include a GPU in the test environment.  
+Some manual testing has been done, but is not extensive.  The software may contain bugs, unexpected behaviors, or have other issues.
+
+The [MIT License](./LICENSE.md) also includes this disclaimer: 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## code and data for specific simulations
+
+Code specific to the spatial voting and budget voting portions of our research publication above -- as well as output data -- 
+is deposited at: [OSF Dataset for A comparison of zero and minimal Intelligence agendas in majority rule voting models](https://osf.io/k2phe/)
+and is freely available.
 
 ## use of Google Colab
 
@@ -29,7 +51,7 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
 * Nvidia GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
 * Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
 * Python 3 
-* **all** of these Python 3 scientific computing modules (all except cupy are pre-installed on Google Colab, and [cupy can be installed from these instructions](https://docs.cupy.dev/en/stable/install.html)):
+* **all** of these Python-3 scientific computing modules (all except cupy are pre-installed on Google Colab, and [cupy can be installed from these instructions](https://docs.cupy.dev/en/stable/install.html)):
   - numpy
   - pandas
   - matplotlib
@@ -38,6 +60,8 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
 * familiarity with Python language / scientific computing / gpu Nvidia-CUDA setup
 
 ## Random sequential voting simulations
+
+This follows our paper 
 
 A simulation consists of a sequence of times: `t=0,1,2,3,...`
 a finite feasible set of alternatives **F**, a rule for selecting challengers,
