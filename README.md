@@ -18,12 +18,14 @@ The software is provided in the hope that it may be useful to others, but it is 
 system for conducting arbitrary voting simulations. While some manual tests have been done, 
 there are currently no automated tests.  
 
+## use of Google Colab
+
+We used [Google Colab](https://colab.google), a cloud-based service for running Python analysis notebooks on Google's servers and GPUs,
+for conducting most of the research reported in the publication above.  When using Google Colab, the local computer does NOT need to have a GPU.
+
+The software has also been tested (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
+
 ## requirements
-
-The software requires a GPU for math acceleration.  This can be a local GPU, or a cloud GPU.  
-
-[Google Colab](https://colab.google) is a cloud-based service for running Python analysis notebooks on Google's servers and GPUs.
-
 * NVIDIA GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
 * Python 3 
 * **all** of these Python 3 scientific computing modules (all except cupy are pre-installed on Google Colab, and [cupy can be installed from these instructions](https://docs.cupy.dev/en/stable/install.html)):
