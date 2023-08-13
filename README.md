@@ -11,7 +11,9 @@ This software helps set up, calculate, and plot stationary probability distribut
 sequential voting simulations (with ZI or MI random challengers) that take place on a 2D grid of feasible outcomes.
 
 In our paper, we used the simulations to show that adding intelligence to the agenda of a collection of voting bots does not necessarily
-improve the fairness or reasonableness of outcomes.
+improve the fairness or reasonableness of outcomes.  We're not claiming adding intelligence is always bad, since one 
+cannot deduce such generalities from a few simulations. But in some well-known scenarios, the simulations demonstrate cases where
+adding intelligence to the voting agenda can lead to unexpected outcomes.
 
 ## License
 
@@ -80,12 +82,15 @@ winning alternatives given the status quo `f[t]`.
 
 ## Specialization of parts of the software / Separation of Concerns
 
-The `VotingModel` class manages simulations.  Each simulation is an instance of `VotingModel`.
-Besides plotting and simple questions about the alternatives, the class also provides code
+The `VotingModel` class manages simulations.  Each simulation is an instance of `VotingModel`.  The constructor
+requires various properties of the simulation, such as the number of voters, number of alternatives, and voters' utility functions.
+Utility functions are arrays of dim `(number_of_voters, number_of_alternatives)` defining the preferences of each voter for
+each outcome as a number where more is better. It is the ordering and not the values that are important.  
+Besides plotting and answering simple questions about the alternatives, the class also provides code
 for calculating the transition matrix and providing it as an input to the `MarkovChainGPU` class below.
 
 The `Grid` class manages rectangular grids. An instance of `VotingModel` will usually specify
-a Grid instance for plotting or visualization purposes.  It is also possible to use `VotingModel`
+a Grid instance for defining utility functions and plotting/visualization purposes.  It is also possible to use `VotingModel`
 without specifying any kind of grid or coordinate mapping, for an example see class `CondorcetCycle`.
 
 The `MarkovChainGPU` class manages a Markov Chain calulation on a GPU.  This class is called 
