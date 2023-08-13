@@ -20,7 +20,7 @@ there are currently no automated tests.
 
 ## use of Google Colab
 
-We used [Google Colab](https://colab.google), a cloud-based service for running Python analysis notebooks on Google's servers and GPUs,
+We used [Google Colab](https://colab.google), a cloud-based service that runs Python-based analyses on Google's servers and GPUs,
 for conducting most of the research reported in the publication above.  When using Google Colab, the local computer does NOT need to have a GPU.
 
 The software has also been tested (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
