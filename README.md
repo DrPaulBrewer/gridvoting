@@ -19,9 +19,16 @@ system for conducting arbitrary voting simulations. While some manual tests have
 there are currently no automated tests.  
 
 ## requirements
-* Python 3
-* either a remote Google CoLab GPU or a hardware GPU on the computer running the module
-* GPU needs 16GB or more of memory to duplicate simulations reported in the above paper
+* modern NVIDIA GPU: either a remote Google CoLab GPU or a local GPU on the computer running the module
+* GPU needs 16GB or more of GPU memory to duplicate simulations reported in the above paper
+* Python 3 
+* **all** of these Python 3 scientific computing modules (all except cupy are on Google Colab, and cupy can be installed):
+      - numpy
+      - cupy
+      - pandas
+      - matplotlib
+      - scipy
+* Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
 * familiarity with Python language / scientific computing / gpu Nvidia-CUDA setup
 
 ## Random sequential voting simulations
