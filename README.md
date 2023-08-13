@@ -63,11 +63,11 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
 
 ## Random sequential voting simulations
 
-This follows our paper 
+This follows [section 2 of our research paper](https://link.springer.com/article/10.1007/s11403-023-00387-8#Sec4)
 
 A simulation consists of a sequence of times: `t=0,1,2,3,...`
-a finite feasible set of alternatives **F**, a rule for selecting challengers,
-and a mapping of the set of alternativies **F** into a 2D grid.  
+a finite feasible set of alternatives **F**, a set of voters who have preferences over the alternatives and vote truthfully,
+a rule for voting and selecting challengers, and a mapping of the set of alternativies **F** into a 2D grid.  
 
 The active or status quo alternative at time t is called `f[t]`.  
 
