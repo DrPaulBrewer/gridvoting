@@ -13,7 +13,7 @@ sequential voting simulations (with ZI or MI random challengers) that take place
 In our paper, we used the simulations to show that adding intelligence to the agenda of a collection of voting bots does not necessarily
 improve the fairness or reasonableness of outcomes.  We're not claiming adding intelligence is always bad, since one 
 cannot deduce such generalities from a few simulations. But in some well-known scenarios, the simulations demonstrate cases where
-adding intelligence to the voting agenda can lead to unexpected outcomes.
+adding intelligence to the voting agenda can increase the variance and decrease the equality of outcomes for equally situated agents.
 
 ## License
 
