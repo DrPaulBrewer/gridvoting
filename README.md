@@ -80,7 +80,11 @@ of a uniform random distribution over **F**.  When `zi=False`, `c[t]` is chosen 
 "Minimal Intelligence" agenda which is a uniform distribution over the status quo `f[t]` and the possible
 winning alternatives given the status quo `f[t]`.
 
-## Specialization of parts of the software / Separation of Concerns
+## Principal of Operation 
+The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  These concepts are 
+coordinate grids, shapes within a grid, defining a voting simulation, and calculating the stationary distribution of the simulation
+by a GPU-based MarkovChain calculation.  For example, one can have a voting simulation without a grid, or one can have a simulation where
+the feasible alternatives are points within a triangle (from a budget constraint) itself embedded within a square grid for plotting purposes.
 
 The `VotingModel` class manages simulations.  Each simulation is an instance of `VotingModel`.  The constructor
 requires various properties of the simulation, such as the number of voters, number of alternatives, and voters' utility functions.
@@ -98,7 +102,14 @@ internally from `VotingModel`.  The class contains two methods for calculating t
 stationary distribution of a Markov Chain: the power method (default), and an algebraic method
 (optional).  
 
-## WORK IN PROGRESS
+## Classes
+
+### VotingModel
+
+```
+
+
+## Functions
 
 ## Old text
 
