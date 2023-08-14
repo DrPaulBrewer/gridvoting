@@ -108,12 +108,76 @@ stationary distribution of a Markov Chain: the power method (default), and an al
 
 ## Classes
 
-### VotingModel
+### Grid
+
+#### constructor
+
+`gridvoting.Grid(x0, x1, xstep=1, y0, y1, ystep=1)`
+
+Constructs a 2D grid in x and y dimenstions and provides helpful methods for accessing the grid.
+
+- `x0` the leftmost grid x-coordinate
+- `x1` the rightmost grid x-coordinate
+- `xstep=1` optional, default value 1.  grid spacing in x dimenstion
+- `y0` the lowest grid y-coordinate
+- `y1` the highest grid y-coordinate
+- `ystep=1` optional, default value 1.  grid spacing in y dimension
+
+Example:  
 
 ```
+import gridvoting
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+```
+
+Defines a grid where `-5<=x<=5` and `-7<=y<=7` 
+
+This grid will have `11*15 = 165` alternatives corresponding to integer points in the grid.
+
+#### methods
+
+`grid.as_xy_vectors()`
+
+Returns a 2-D array of coordinates for each grid point, starting from the upper left
+
+Example:
+
+```
+import gridvoting
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+vectors = grid.as_xy_vectors()
+print(vectors.shape)
+print(vectors)
+```
+
+`vectors.shape` will be `(165,2)`
+and vectors will be an array of 165 2D coordinates 
+`[[-5,7],[-4,7],[-3,7],...,[5,7],[-5,6],...,[5,6],...,[5,-7]]`
+
+----
+
+`grid.index(x,y)`
+
+Locates the index in the grid's coordinate array for the point (x,y)
+
+Example:
+
+```
+import gridvoting
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+idx = grid.index(x=-4,y=6)
+print(idx)
+```
+
+`idx` will be 12, because `[-4,6]` is entry [12] of `grid.as_xy_vectors()`
+
+----
+
+`grid.spatial_utilities(voter_ideal_points, metric='sqeuclidean', scale=-1)`
 
 
-## Functions
+
+## Other Functions
 
 ## Old text
 
