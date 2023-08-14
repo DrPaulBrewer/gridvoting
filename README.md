@@ -27,8 +27,12 @@ others know it is not the original.  See the LICENSE file for more details.
 
 The software is provided in the hope that it may be useful to others, but it is not a full featured turnkey
 system for conducting arbitrary voting simulations. Additional coding is required to define a specific simulation.
-Also, we do not include an automated test suite because our free testing provider does not include a GPU in the test environment.  
-Some manual testing has been done, but is not extensive.  The software may contain bugs, unexpected behaviors, or have other issues.
+While there are some runtime assertion tests in the software, we do not include a build-time automated test suite 
+because our free testing provider does not include a GPU in the test environment.  
+
+Some manual post-build testing has been done, but is not extensive.  
+
+As with any code where extensive testing is not done, it may contain bugs, unexpected behaviors, or have other issues.
 
 The [MIT License](./LICENSE.md) also includes this disclaimer: 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
