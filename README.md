@@ -80,7 +80,7 @@ of a uniform random distribution over **F**.  When `zi=False`, `c[t]` is chosen 
 "Minimal Intelligence" agenda which is a uniform distribution over the status quo `f[t]` and the possible
 winning alternatives given the status quo `f[t]`.
 
-## Principal of Operation 
+## Principles of Operation 
 The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  These concepts are 
 coordinate grids, shapes within a grid, defining a voting simulation, and calculating the stationary distribution of the simulation
 by a GPU-based MarkovChain calculation.  For example, one can have a voting simulation without a grid, or one can have a simulation where
