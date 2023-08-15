@@ -21,18 +21,41 @@ class Grid:
         xgrid, ygrid = np.meshgrid(xvals, yvals)
         self.x = np.ravel(xgrid)
         self.y = np.ravel(ygrid)
-        self.extent = (self.x0, self.x1, self.y0, self.y1)
-        self.gshape = (1+int((x1-x0)/xstep), 1+int((y1-y0)/ystep))
+        # should match extent=(x0,x1,y0,y1) for compatibility with matplotlib.pyplot.contour
+        # see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html
+        self.extent = (self.x0, self.x1, self.y0, self.y1)  
+        self.gshape = self.shape()
         self.len = self.gshape[0]*self.gshape[1]
         assert(self.x.shape == (self.len,))
         assert(self.y.shape == (self.len,))
+
+    def shape(self, *, x0=self.x0, x1=self.x1, xstep=self.xstep, y0=self.y0, y1=self.y1, ystep=self.ystep):
+        """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a grid with altered bounds"""
+        if (x1<x0) raise ValueError
+        if (y1<y0) raise ValueError
+        if (xstep<=0) raise ValueError
+        if (ystep<=0) raise ValueError
+        number_of_rows = 1+int((y1-y0)/ystep)
+        number_of_cols = 1+int((x1-x0)/xstep)
+        return (number_of_rows,number_of_cols)
+
+    def within_box(self, *, x0=self.x0,x1=self.x1,y0=self.y0,y1=self.y1):
+        """returns a 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined box"""
+        return (self.x>=x0) & (self.x<=x1) & (self.y>=y0) & (self.y<=y1)
+
+    def within_disk(self, *, x0, y0, r):
+        """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined circle"""
+        r2 = r*r
+        xdiff = self.x-x0
+        ydiff = self.y-y0
+        return (xdiff*xdiff+ydiff*ydiff)<=r2
 
     def as_xy_vectors(self):
         """returns [x,y] vectors for all grid points"""
         return np.column_stack((self.x, self.y))
 
     def index(self, *, x, y):
-        """returns the unique 1D array index for grid point (x,y)"""
+        """returns the unique 1D array index for grid point (x,y)"""(
         isSelectedPoint = (self.x == x) & (self.y == y)
         indexes = np.flatnonzero((isSelectedPoint))
         assert(len(indexes) == 1)
@@ -104,12 +127,9 @@ class Grid:
             assert(points.shape[1] == 2)
             [min_x, min_y] = np.min(points, axis=0)-border
             [max_x, max_y] = np.max(points, axis=0)+border
-            inZoom = (self.x >= min_x) & (self.x <= max_x) \
-                & (self.y >= min_y) & (self.y <= max_y)
-            zshape = (
-                1+int((max_y-min_y)/self.ystep),
-                1+int((max_x-min_x)/self.xstep)
-            )
+            box = {x0: min_x, x1: max_x, y0: min_y, y1: max_y}
+            inZoom = self.within_box(**box)
+            zshape = self.shape(**box)
             extent = (min_x, max_x, min_y, max_y)
             zraw = np.copy(z[inZoom]).reshape(zshape)
             x = np.copy(self.x[inZoom]).reshape(zshape)
