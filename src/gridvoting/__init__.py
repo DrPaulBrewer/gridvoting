@@ -29,8 +29,14 @@ class Grid:
         assert(self.x.shape == (self.len,))
         assert(self.y.shape == (self.len,))
 
-    def shape(self, *, x0=self.x0, x1=self.x1, xstep=self.xstep, y0=self.y0, y1=self.y1, ystep=self.ystep):
+    def shape(self, *, x0=None, x1=None, xstep=None, y0=None, y1=None, ystep=None):
         """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset"""
+        x0 = self.x0 if x0 is None else x0
+        x1 = self.x1 if x1 is None else x1
+        y0 = self.y0 if y0 is None else y0
+        y1 = self.y1 if y1 is None else y1
+        xstep = self.xstep if xstep is None else xstep
+        ystep = self.ystep if ystep is None else ystep
         if x1<x0:
             raise ValueError
         if y1<y0:
@@ -43,8 +49,12 @@ class Grid:
         number_of_cols = 1+int((x1-x0)/xstep)
         return (number_of_rows,number_of_cols)
 
-    def within_box(self, *, x0=self.x0,x1=self.x1,y0=self.y0,y1=self.y1):
+    def within_box(self, *, x0=None,x1=None,y0=None,y1=None):
         """returns a 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined box"""
+        x0 = self.x0 if x0 is None else x0
+        x1 = self.x1 if x1 is None else x1
+        y0 = self.y0 if y0 is None else y0
+        y1 = self.y1 if y1 is None else y1
         return (self.x>=x0) & (self.x<=x1) & (self.y>=y0) & (self.y<=y1)
 
     def within_disk(self, *, x0, y0, r):
