@@ -21,7 +21,9 @@ class Grid:
         xgrid, ygrid = np.meshgrid(xvals, yvals)
         self.x = np.ravel(xgrid)
         self.y = np.ravel(ygrid)
-        self.extent = (self.x0, self.x1, self.y0, self.y1)
+        # should match extent=(x0,x1,y0,y1) for compatibility with matplotlib.pyplot.contour
+        # see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html
+        self.extent = (self.x0, self.x1, self.y0, self.y1)  
         self.gshape = (1+int((x1-x0)/xstep), 1+int((y1-y0)/ystep))
         self.len = self.gshape[0]*self.gshape[1]
         assert(self.x.shape == (self.len,))
