@@ -158,7 +158,7 @@ Instance Properties:
 * calculated properties
   - grid.x -- 1D numpy array containing the x-coordinate of each grid point in typewriter order
   - grid.y -- 1D numpy array containing the y-coordinate of each grid point in typewriter order
-  - grid.gshape -- under review (see issue #10)
+  - grid.gshape -- natural shape (number_of_rows,number_of_cols) where rows represent y-axis and cols represent x-axis
   - grid.extent -- equal to the tuple (x0,x1,y0,y1) for use with matplotlib.pyplot.plt
   - grid.len -- equal to the number of points on the grid
 
@@ -203,19 +203,11 @@ print(idx)
 
 `grid.spatial_utilities(voter_ideal_points, metric='sqeuclidean', scale=-1)`
 
+### VotingModel
 
+
+### MarkovChainGPU
 
 ## Other Functions
 
-## Old text
-
-Inputs:
-* grid size in 2D -glimit <= x,y <= glimit
-* utility functions for each voter for each point on the grid
-* challenger strategy (zi True/False)
-
-Outputs:
-* Markov chain transition matrix
-* Existence of core (absorbing) points
-* Stationary distributions (no core)
-* Diagnostic and distribution plots
+TO BE DOCUMENTED
