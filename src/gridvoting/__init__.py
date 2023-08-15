@@ -30,11 +30,15 @@ class Grid:
         assert(self.y.shape == (self.len,))
 
     def shape(self, *, x0=self.x0, x1=self.x1, xstep=self.xstep, y0=self.y0, y1=self.y1, ystep=self.ystep):
-        """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a grid with altered bounds"""
-        if (x1<x0) raise ValueError
-        if (y1<y0) raise ValueError
-        if (xstep<=0) raise ValueError
-        if (ystep<=0) raise ValueError
+        """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset"""
+        if x1<x0:
+            raise ValueError
+        if y1<y0:
+            raise ValueError
+        if xstep<=0:
+            raise ValueError
+        if ystep<=0:
+            raise ValueError
         number_of_rows = 1+int((y1-y0)/ystep)
         number_of_cols = 1+int((x1-x0)/xstep)
         return (number_of_rows,number_of_cols)
