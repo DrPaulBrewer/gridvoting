@@ -59,7 +59,7 @@ class Grid:
         return np.column_stack((self.x, self.y))
 
     def index(self, *, x, y):
-        """returns the unique 1D array index for grid point (x,y)"""(
+        """returns the unique 1D array index for grid point (x,y)"""
         isSelectedPoint = (self.x == x) & (self.y == y)
         indexes = np.flatnonzero((isSelectedPoint))
         assert(len(indexes) == 1)
