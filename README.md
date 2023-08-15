@@ -146,6 +146,17 @@ Defines a grid where `-5<=x<=5` and `-7<=y<=7`
 
 This grid will have `11*15 = 165` alternatives corresponding to integer points in the grid.
 
+Instance Properties:
+* parameters from the constructor call are available as instance properties
+  - grid.x0
+  - grid.x1
+  - grid.xstep
+  - grid.y0
+  - grid.y1
+  - grid.ystep
+* calculated properties
+  - 
+
 #### methods
 
 `grid.as_xy_vectors()`
