@@ -85,8 +85,16 @@ of a uniform random distribution over **F**.  When `zi=False`, `c[t]` is chosen 
 winning alternatives given the status quo `f[t]`.
 
 ## Principles of Operation 
-The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  These concepts are 
-coordinate grids, shapes within a grid, defining a voting simulation, and calculating the stationary distribution of the simulation
+This section extends a higher, more mathematical description from [section 3 of our research paper](https://link.springer.com/article/10.1007/s11403-023-00387-8#Sec5).
+with an overview of the code in the gridvoting module.
+
+The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  A primary concern
+is data transformation between different tasks.  The VotingModel and related Markov chain require a probabilistic vector space of dim number_of_alternatives.
+Plotting occurs in a rectangular area.  The alternatives then also need to have coordinates within a rectangular area.  Utility functions for the 
+alternatives might also depend their coordinates.  If the alternatives' coordinates are not equivalent to a complete rectangular grid, then there might need to be
+an embedding function from some smaller space into the rectangular area.  
+
+The various concepts are coordinate grids, shapes within a grid, defining a voting simulation, and calculating the stationary distribution of the simulation
 by a GPU-based MarkovChain calculation.  For example, one can have a voting simulation without a grid, or one can have a simulation where
 the feasible alternatives are points within a triangle (from a budget constraint) itself embedded within a square grid for plotting purposes.
 
