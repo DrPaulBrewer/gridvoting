@@ -88,12 +88,15 @@ winning alternatives given the status quo `f[t]`.
 This section extends a higher, more mathematical description from [section 3 of our research paper](https://link.springer.com/article/10.1007/s11403-023-00387-8#Sec5).
 with an overview of the code in the gridvoting module.
 
-The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  A primary concern
-is data transformation between different tasks.  The VotingModel and related Markov chain require a probabilistic vector space of dim number_of_alternatives.
+The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  
+
+A primary concern is data transformation between different tasks.  The VotingModel and related Markov chain require a probabilistic vector space of dim number_of_alternatives.
 Plotting occurs in a rectangular area.  The alternatives then also need to have coordinates within a rectangular area.  Utility functions for the 
 alternatives might also depend on their coordinates.  If the alternatives' coordinates are not equivalent to a complete rectangular grid, then there needs to be
 an embedding function from some smaller space into the rectangular area in order to communicate the results from the Markov chain calculation to the plotting routines
-to the viewers' screen.
+to the viewers' screen.  The Python3 `numpy` module creates arrays that are easy to reshape and manipulate, and is used intenally for many of the data transfomations.
+Knowledge of how `numpy` can be used to manipulate data will be useful in writing additional code to further manipulate or analyze simulation data.
+The `cupy` module is a drop-in replacement for `numpy` for accelerating data manipulation by using a hardware GPU.
 
 The various concepts are coordinate grids, shapes within a grid, defining a voting simulation, and calculating the stationary distribution of the simulation
 by a GPU-based MarkovChain calculation.  For example, one can have a voting simulation without a grid, or one can have a simulation where
