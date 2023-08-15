@@ -91,8 +91,9 @@ with an overview of the code in the gridvoting module.
 The gridvoting software module is designed to separate various concerns and manage the overlap of concepts.  A primary concern
 is data transformation between different tasks.  The VotingModel and related Markov chain require a probabilistic vector space of dim number_of_alternatives.
 Plotting occurs in a rectangular area.  The alternatives then also need to have coordinates within a rectangular area.  Utility functions for the 
-alternatives might also depend their coordinates.  If the alternatives' coordinates are not equivalent to a complete rectangular grid, then there might need to be
-an embedding function from some smaller space into the rectangular area.  
+alternatives might also depend on their coordinates.  If the alternatives' coordinates are not equivalent to a complete rectangular grid, then there needs to be
+an embedding function from some smaller space into the rectangular area in order to communicate the results from the Markov chain calculation to the plotting routines
+to the viewers' screen.
 
 The various concepts are coordinate grids, shapes within a grid, defining a voting simulation, and calculating the stationary distribution of the simulation
 by a GPU-based MarkovChain calculation.  For example, one can have a voting simulation without a grid, or one can have a simulation where
@@ -100,8 +101,8 @@ the feasible alternatives are points within a triangle (from a budget constraint
 
 The `VotingModel` class manages simulations.  Each simulation is an instance of `VotingModel`.  The constructor
 requires various properties of the simulation, such as the number of voters, number of alternatives, and voters' utility functions.
-Utility functions are arrays of dim `(number_of_voters, number_of_alternatives)` defining the preferences of each voter for
-each outcome as a number where more is better. It is the ordering and not the values that are important.  
+Utility functions are defined not as Python3 functions but as numeric arrays of dim `(number_of_voters, number_of_alternatives)` defining the 
+utility of each voter for each outcome as a number where more is better. It is the ordering and not the values that are important.  
 Besides plotting and answering simple questions about the alternatives, the class also provides code
 for calculating the transition matrix and providing it as an input to the `MarkovChainGPU` class below.
 
