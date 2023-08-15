@@ -155,13 +155,17 @@ Instance Properties:
   - grid.y1
   - grid.ystep
 * calculated properties
-  - 
+  - grid.x -- 1D numpy array containing the x-coordinate of each grid point in typewriter order
+  - grid.y -- 1D numpy array containing the y-coordinate of each grid point in typewriter order
+  - grid.gshape -- under review (see issue #10)
+  - grid.extent -- equal to the tuple (x0,x1,y0,y1) for use with matplotlib.pyplot.plt
+  - grid.len -- equal to the number of points on the grid
 
 #### methods
 
 `grid.as_xy_vectors()`
 
-Returns a 2-D array of coordinates for each grid point, starting from the upper left
+Returns a 2-D array of coordinates for each grid point in typewriter order
 
 Example:
 
