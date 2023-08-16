@@ -29,6 +29,12 @@ class Grid:
         assert(self.x.shape == (self.len,))
         assert(self.y.shape == (self.len,))
 
+    def as_xy_vectors(self):
+        """returns [x,y] vectors for all grid points"""
+        vectors = np.column_stack((self.x, self.y))
+        assert(vectors.shape == (self.len, 2))
+        return vectors
+    
     def shape(self, *, x0=None, x1=None, xstep=None, y0=None, y1=None, ystep=None):
         """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset"""
         x0 = self.x0 if x0 is None else x0
@@ -57,16 +63,9 @@ class Grid:
         y1 = self.y1 if y1 is None else y1
         return (self.x>=x0) & (self.x<=x1) & (self.y>=y0) & (self.y<=y1)
 
-    def within_disk(self, *, x0, y0, r):
-        """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined circle"""
-        r2 = r*r
-        xdiff = self.x-x0
-        ydiff = self.y-y0
-        return (xdiff*xdiff+ydiff*ydiff)<=r2
-
-    def as_xy_vectors(self):
-        """returns [x,y] vectors for all grid points"""
-        return np.column_stack((self.x, self.y))
+    def within_disk(self, *, x0, y0, r, metric='euclidean', **kwargs):
+        """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk"""
+        return cdist([[x0,y0]], self.as_xy_vectors(), metric=metric, **kwargs)<=r
 
     def index(self, *, x, y):
         """returns the unique 1D array index for grid point (x,y)"""
@@ -104,13 +103,15 @@ class Grid:
         *,
         voter_ideal_points,
         metric='sqeuclidean',
-        scale=-1
+        scale=-1,
+        **kwargs
     ):
         """returns utility function values for each voter at each grid point"""
         return scale*cdist(
             voter_ideal_points,
             self.as_xy_vectors(),
-            metric=metric
+            metric=metric,
+            **kwargs
         )
 
     def plot(
