@@ -65,7 +65,9 @@ class Grid:
 
     def within_disk(self, *, x0, y0, r, metric='euclidean', **kwargs):
         """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk"""
-        return cdist([[x0,y0]], self.as_xy_vectors(), metric=metric, **kwargs)<=r
+        mask = (cdist([[x0,y0]], self.as_xy_vectors(), metric=metric, **kwargs)<=r).flatten()
+        assert(mask.shape == (self.len,))
+        return mask
 
     def index(self, *, x, y):
         """returns the unique 1D array index for grid point (x,y)"""
