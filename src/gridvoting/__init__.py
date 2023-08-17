@@ -144,7 +144,7 @@ class Grid:
             assert(points.shape[1] == 2)
             [min_x, min_y] = np.min(points, axis=0)-border
             [max_x, max_y] = np.max(points, axis=0)+border
-            box = {x0: min_x, x1: max_x, y0: min_y, y1: max_y}
+            box = {'x0': min_x, 'x1': max_x, 'y0': min_y, 'y1': max_y}
             inZoom = self.within_box(**box)
             zshape = self.shape(**box)
             extent = (min_x, max_x, min_y, max_y)
