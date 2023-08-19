@@ -285,8 +285,35 @@ print(idx)
 `idx` will be 12, because `[-4,6]` is entry [12] of `grid.as_xy_vectors()`
 
 ----
+`grid.plot(title=None, cmap=<matplotlib.colors.LinearSegmentedColormap object at 0x7ff3fa5dbca0>, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
 
+----
+`grid.shape(x0=None, x1=None, xstep=None, y0=None, y1=None, ystep=None)`
+
+returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset
+
+----
 `grid.spatial_utilities(voter_ideal_points, metric='sqeuclidean', scale=-1)`
+
+returns utility function values for each voter at each grid point as a function of distance from an ideal point
+
+`voter_ideal_points` an array of 2D coordinates [[xv1,yv1],[xv2,yv2],...]  for the ideal points of voters 1,2,...
+
+`metric` the default `sqeuclidean` uses the squared euclidean distance.  `cityblock` uses the taxicab metric.
+Internally, this method calls `scipy.spatial.distance.cdist` where the [metrics are listed and documented](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html) 
+
+----
+`grid.within_box(x0=None, x1=None, y0=None, y1=None)
+
+ returns a 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined box
+     |  
+
+----
+`grid.within_disk(x0, y0, r, metric='euclidean', **kwarg)`
+
+ returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk
+
+----
 
 ### VotingModel
 
