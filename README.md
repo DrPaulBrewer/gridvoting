@@ -197,7 +197,7 @@ the undefined region to be ignored by the plotter rather than set to 0.
 
 Example:
 
-``
+```
 import gridvoting
 grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
 # grid.len == 165
