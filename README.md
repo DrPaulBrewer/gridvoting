@@ -58,7 +58,7 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
 * Nvidia GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
 * Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
 * Python 3 
-* **all** of these Python-3 scientific computing modules (all except cupy are pre-installed on Google Colab, and [cupy can be installed from these instructions](https://docs.cupy.dev/en/stable/install.html)):
+* **all** of these Python-3 scientific computing modules (except on Google Colab, where these are all preinstalled on GPU instances):
   - numpy
   - pandas
   - matplotlib
