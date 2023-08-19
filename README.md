@@ -172,7 +172,7 @@ Example:
 
 ```
 import gridvoting
-grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
 vectors = grid.as_xy_vectors()
 print(vectors.shape)
 print(vectors)
@@ -183,7 +183,22 @@ and vectors will be an array of 165 2D coordinates
 `[[-5,7],[-4,7],[-3,7],...,[5,7],[-5,6],...,[5,6],...,[5,-7]]`
 
 ----
+`grid.embedding(valid, fill=0.0)`
 
+returns an embedding function efunc
+
+efunc maps 1D arrays of size sum(valid)
+to arrays of size grid.len
+
+Example:
+
+``
+import gridvoting
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)`
+
+```
+
+----
 `grid.index(x,y)`
 
 Locates the index in the grid's coordinate array for the point (x,y)
@@ -192,7 +207,7 @@ Example:
 
 ```
 import gridvoting
-grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
 idx = grid.index(x=-4,y=6)
 print(idx)
 ```
