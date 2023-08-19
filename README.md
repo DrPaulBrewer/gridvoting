@@ -190,6 +190,11 @@ returns an embedding function efunc
 efunc maps 1D arrays of size sum(valid)
 to arrays of size grid.len
 
+`valid` is a boolean array of length grid.len used to select the grid points 
+associated with the embedded shape.  This can be constructed from conditions
+on `grid.x`, `grid.y`, methods `grid.within_box` and `grid.within_disk` (see below), 
+and appropriate boolean operators.
+
 `fill` is used to set the value in the region where `valid` is `False`.
 
 `fill=np.nan` is useful when used with matplotlib contour plots, as it will cause
