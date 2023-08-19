@@ -190,12 +190,77 @@ returns an embedding function efunc
 efunc maps 1D arrays of size sum(valid)
 to arrays of size grid.len
 
+`fill` is used to set the value in the region where `valid` is `False`.
+
+`fill=np.nan` is useful when used with matplotlib contour plots, as it will cause
+the undefined region to be ignored by the plotter rather than set to 0.
+
 Example:
 
 ``
 import gridvoting
-grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)`
-
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
+# grid.len == 165
+# a boolean array of size grid.len defines a subset of a grid
+triangle = (grid.x>=0) & (grid.y>=0) & ((grid.x+grid.y)<=4)
+print(triangle.reshape(grid.gshape))
+[[False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False  True False False False False False]
+ [False False False False False  True  True False False False False]
+ [False False False False False  True  True  True False False False]
+ [False False False False False  True  True  True  True False False]
+ [False False False False False  True  True  True  True  True False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]]
+# you can see the triangle shape in the True's
+# you can count the points with sum because False->0 and True->1
+print(sum(triangle)) # 15 - the triangle has 15 points on the grid
+# [triangle] can now be used as an index to restrict arrays of 165 entries
+# down to arrays defined on the triangle with 15 entries
+# we can use this to print the (x,y) coordinates for the triangle points
+print(grid.as_xy_vectors()[triangle])
+[[0 4]
+ [0 3]
+ [1 3]
+ [0 2]
+ [1 2]
+ [2 2]
+ [0 1]
+ [1 1]
+ [2 1]
+ [3 1]
+ [0 0]
+ [1 0]
+ [2 0]
+ [3 0]
+ [4 0]]
+# grid.embedding creates a function from arrays of 15 entries to arrays of 165 entries
+emfunc = grid.embedding(valid=triangle, fill=0.0)
+triangle_x = grid.x[triangle] # [0 0 1 0 1 2 0 1 2 3 0 1 2 3 4]
+# embedding triangle_x into the grid will give a function that is 0 except in the triangle, where it is x
+print(emfunc(triangle_x).reshape(grid.gshape))
+[[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 2. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 2. 3. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 2. 3. 4. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]]
 ```
 
 ----
