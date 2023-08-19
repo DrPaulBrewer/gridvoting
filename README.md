@@ -303,7 +303,7 @@ returns utility function values for each voter at each grid point as a function 
 Internally, this method calls `scipy.spatial.distance.cdist` where the [metrics are listed and documented](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html) 
 
 ----
-`grid.within_box(x0=None, x1=None, y0=None, y1=None)
+`grid.within_box(x0=None, x1=None, y0=None, y1=None)`
 
  returns a 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined box
      |  
