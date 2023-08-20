@@ -58,7 +58,7 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
 * Nvidia GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
 * Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
 * Python 3 
-* **all** of these Python-3 scientific computing modules (all except cupy are pre-installed on Google Colab, and [cupy can be installed from these instructions](https://docs.cupy.dev/en/stable/install.html)):
+* **all** of these Python-3 scientific computing modules (except on Google Colab, where these are all preinstalled on GPU instances):
   - numpy
   - pandas
   - matplotlib
@@ -121,7 +121,7 @@ stationary distribution of a Markov Chain: the power method (default), and an al
 
 ## Classes
 
-### Grid
+### class Grid
 
 #### constructor
 
@@ -172,7 +172,7 @@ Example:
 
 ```
 import gridvoting
-grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
 vectors = grid.as_xy_vectors()
 print(vectors.shape)
 print(vectors)
@@ -183,7 +183,92 @@ and vectors will be an array of 165 2D coordinates
 `[[-5,7],[-4,7],[-3,7],...,[5,7],[-5,6],...,[5,6],...,[5,-7]]`
 
 ----
+`grid.embedding(valid, fill=0.0)`
 
+returns an embedding function efunc
+
+efunc maps 1D arrays of size sum(valid)
+to arrays of size grid.len
+
+`valid` is a boolean array of length grid.len used to select the grid points 
+associated with the embedded shape.  This can be constructed from conditions
+on `grid.x`, `grid.y`, methods `grid.within_box` and `grid.within_disk` (see below), 
+and appropriate boolean operators.
+
+`fill` is used to set the value in the region where `valid` is `False`.
+
+`fill=np.nan` is useful when used with matplotlib contour plots, as it will cause
+the undefined region to be ignored by the plotter rather than set to 0.
+
+Example:
+
+```
+import gridvoting
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
+# grid.len == 165
+# a boolean array of size grid.len defines a subset of a grid
+triangle = (grid.x>=0) & (grid.y>=0) & ((grid.x+grid.y)<=4)
+print(triangle.reshape(grid.gshape))
+[[False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False  True False False False False False]
+ [False False False False False  True  True False False False False]
+ [False False False False False  True  True  True False False False]
+ [False False False False False  True  True  True  True False False]
+ [False False False False False  True  True  True  True  True False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]
+ [False False False False False False False False False False False]]
+# you can see the triangle shape in the True's
+# you can count the points with sum because False->0 and True->1
+print(sum(triangle)) # 15 - the triangle has 15 points on the grid
+# [triangle] can now be used as an index to restrict arrays of 165 entries
+# down to arrays defined on the triangle with 15 entries
+# we can use this to print the (x,y) coordinates for the triangle points
+print(grid.as_xy_vectors()[triangle])
+[[0 4]
+ [0 3]
+ [1 3]
+ [0 2]
+ [1 2]
+ [2 2]
+ [0 1]
+ [1 1]
+ [2 1]
+ [3 1]
+ [0 0]
+ [1 0]
+ [2 0]
+ [3 0]
+ [4 0]]
+# grid.embedding creates a function from arrays of 15 entries to arrays of 165 entries
+emfunc = grid.embedding(valid=triangle, fill=0.0)
+triangle_x = grid.x[triangle] # [0 0 1 0 1 2 0 1 2 3 0 1 2 3 4]
+# embedding triangle_x into the grid will give a function that is 0 except in the triangle, where it is x
+print(emfunc(triangle_x).reshape(grid.gshape))
+[[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 2. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 2. 3. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 1. 2. 3. 4. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+ [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]]
+```
+
+----
 `grid.index(x,y)`
 
 Locates the index in the grid's coordinate array for the point (x,y)
@@ -192,7 +277,7 @@ Example:
 
 ```
 import gridvoting
-grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y=7)
+grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
 idx = grid.index(x=-4,y=6)
 print(idx)
 ```
@@ -200,14 +285,115 @@ print(idx)
 `idx` will be 12, because `[-4,6]` is entry [12] of `grid.as_xy_vectors()`
 
 ----
+`grid.plot(title=None, cmap=<matplotlib.colors.LinearSegmentedColormap object at 0x7ff3fa5dbca0>, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
 
+Creates a plot 
+
+Explanation Generated by Github Copilot:
+
+takes as input z (a numpy array of size n*m), and optionally a title, a colormap, a transparency, points to plot, whether to zoom, the border to add, the logbias, the figsize, the dpi and the fname, and plots the values z on the grid, optionally plots the points, and optionally zooms to fit the bounding box of the points
+
+----
+`grid.shape(x0=None, x1=None, xstep=None, y0=None, y1=None, ystep=None)`
+
+returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset
+
+----
 `grid.spatial_utilities(voter_ideal_points, metric='sqeuclidean', scale=-1)`
 
-### VotingModel
+returns utility function values for each voter at each grid point as a function of distance from an ideal point
+
+`voter_ideal_points` an array of 2D coordinates [[xv1,yv1],[xv2,yv2],...]  for the ideal points of voters 1,2,...
+
+`metric` the default `sqeuclidean` uses the squared euclidean distance.  `cityblock` uses the taxicab metric.
+Internally, this method calls `scipy.spatial.distance.cdist` where the [metrics are listed and documented](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html) 
+
+----
+`grid.within_box(x0=None, x1=None, y0=None, y1=None)`
+
+ returns a 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined box
+     |  
+
+----
+`grid.within_disk(x0, y0, r, metric='euclidean', **kwarg)`
+
+ returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk
+
+----
+
+### class VotingModel
+`gridvoting.VotingModel`
+
+#### constructor
+
+```
+gridvoting.VotingModel(
+        utility_functions,
+        number_of_voters,
+        number_of_feasible_alternatives,
+        majority,
+        zi)
+```
+
+#### methods
+
+`analyze()`
+
+`what_beats(index)`
+
+`what_is_beaten_by(index)`git p
+
+```
+plots(
+      grid,
+        voter_ideal_points,
+        diagnostics=False,
+        log=True,
+        embedding=lambda z: z,
+        zoomborder=0,
+        dpi=72,
+        figsize=(10, 10),
+        fprefix=None,
+        title_core='Core (aborbing) points',
+        title_sad='L1 norm of difference in two rows of P^power',
+        title_diff1='L1 norm of change in corner row',
+        title_diff2='L1 norm of change in center row',
+        title_sum1minus1='Corner row sum minus 1.0',
+        title_sum2minus1='Center row sum minus 1.0',
+        title_unreachable_points='Dominated (unreachable) points',
+        title_stationary_distribution_no_grid='Stationary Distribution',
+        title_stationary_distribution='Stationary Distribution',
+        title_stationary_distribution_zoom='Stationary Distribution (zoom)'
+)
+```
+
+`_get_transition_matrix()`
+
+### class MarkovChainGPU
+
+#### constructor
+
+`gridvoting.MarkovChainGPU(P, computeNow=True, tolerance=1e-10)`
+
+`P` a valid transition matrix -- should be a square numpy array whose rows all sum to near 1.0 -- this is checked with assert statements
+
+`computeNow=True` boolean - immediately compute Markov Chain properties 
+
+`tolerance=1e-10` float - tolerance for checking rowsums of transition matrix
+
+#### methods
+
+`L1_norm_of_single_step_change(x)`
+
+`solve_for_unit_eigenvector()`
+
+`find_unique_stationary_distribution(tolerance,start_power=2)`
 
 
-### MarkovChainGPU
+
 
 ## Other Functions
 
-TO BE DOCUMENTED
+`assert_valid_transition_matrix(P, *, decimal=10):` is a function definition with one required parameter `P` and one keyword-only parameter `decimal` with a default value of `10`. This function asserts that the matrix `P` is square and that each row sums to 1.0 with a default tolerance of 10 decimal places.
+
+`assert_zero_diagonal_int_matrix(M):` asserts that numpy or cupy array M is square and the diagonal entries are all 0.0 """
