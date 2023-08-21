@@ -2,8 +2,8 @@ import pytest
 
 def test_module():
     import gridvoting
-    assert not gridvoting.use_cupy
-    assert gridvoting.xp is gridvoting.np
+    assert (not gridvoting.use_cupy) == (gridvoting.xp is gridvoting.np)
+    print("use_cupy is ",gridvoting.use_cupy)
 
 def test_condorcet_zi():
     import gridvoting as gv
