@@ -247,10 +247,10 @@ print(grid.as_xy_vectors()[triangle])
  [3 0]
  [4 0]]
 # grid.embedding creates a function from arrays of 15 entries to arrays of 165 entries
-emfunc = grid.embedding(valid=triangle, fill=0.0)
+emfunc = grid.embedding(valid=triangle)
 triangle_x = grid.x[triangle] # [0 0 1 0 1 2 0 1 2 3 0 1 2 3 4]
 # embedding triangle_x into the grid will give a function that is 0 except in the triangle, where it is x
-print(emfunc(triangle_x).reshape(grid.gshape))
+print(emfunc(triangle_x, fill=0.0).reshape(grid.gshape))
 [[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
  [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
  [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
