@@ -39,9 +39,11 @@ class Grid:
         # see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html
         self.extent = (self.x0, self.x1, self.y0, self.y1)
         self.gshape = self.shape()
+        self.boundary = ((self.x==x0) | (self.x==x1) | (self.y==y0) | (self.y==y1))
         self.len = self.gshape[0] * self.gshape[1]
         assert self.x.shape == (self.len,)
         assert self.y.shape == (self.len,)
+
 
     def as_xy_vectors(self):
         """returns [x,y] vectors for all grid points"""

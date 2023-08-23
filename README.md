@@ -161,6 +161,7 @@ Instance Properties:
   - grid.gshape -- natural shape (number_of_rows,number_of_cols) where rows represent y-axis and cols represent x-axis
   - grid.extent -- equal to the tuple (x0,x1,y0,y1) for use with matplotlib.pyplot.plt
   - grid.len -- equal to the number of points on the grid
+  - grid.boundary -- a 1D numpy boolean array, equal to ((grid.x==x0) | (grid.x==x1) | (grid.y==y0) | (grid.y==y1))
 
 #### methods
 

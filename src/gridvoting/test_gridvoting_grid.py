@@ -1,10 +1,5 @@
 import pytest
 
-def test_module():
-    import gridvoting
-    assert (not gridvoting.use_cupy) == (gridvoting.xp is gridvoting.np)
-    print("use_cupy is ",gridvoting.use_cupy)
-
 def test_grid_init():
     import gridvoting
     np = gridvoting.np
@@ -55,6 +50,27 @@ def test_grid_init():
     )
     assert grid.x.shape == (165,)
     assert grid.y.shape == (165,)
+    assert grid.boundary[0]
+    assert grid.boundary[-1]
+    assert grid.boundary.shape == (165,)
+    correct_boundary = np.array([
+    [ True,  True,  True,  True,  True,  True,  True,  True,  True,  True,  True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False,  False, False, False, False, False, True],
+    [True, False, False, False, False,  False, False, False, False, False, True],
+    [True, False, False, False, False,  False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True, False, False, False, False, False, False, False, False, False, True],
+    [True,   True,  True,  True, True,  True,  True,  True,  True,  True,  True]
+    ])
+    np.testing.assert_array_equal(grid.boundary.reshape(grid.gshape), correct_boundary)
     np.testing.assert_array_equal(grid.x.reshape(grid.gshape), correct_grid_x)
     np.testing.assert_array_equal(grid.y.reshape(grid.gshape), correct_grid_y)
  
@@ -253,97 +269,5 @@ def test_grid_spatial_utility():
            [-74., -65., -58., -53., -50., -49., -50., -53., -58., -65., -74.],
            [-89., -80., -73., -68., -65., -64., -65., -68., -73., -80., -89.]])
     xp.testing.assert_array_equal(u,correct_u)
-    
 
-@pytest.mark.parametrize("zi,correct_P", [
-    (True, [
-        [2./3.,0.,1./3.],
-        [1./3.,2./3.,0.],
-        [0., 1./3., 2./3.]
-    ]),
-    (False,[
-        [ 1./2., 0, 1./2.],
-        [ 1./2., 1./2., 0],
-        [ 0,  1./2., 1./2.]
-    ])
-])
-def test_condorcet(zi, correct_P):
-    import gridvoting as gv
-    xp = gv.xp
-    condorcet_model =  gv.CondorcetCycle(zi=zi)
-    assert not condorcet_model.analyzed
-    condorcet_model.analyze()
-    assert condorcet_model.analyzed
-    mc = condorcet_model.MarkovChain
-    gv.xp.testing.assert_array_almost_equal(
-        mc.P,
-        xp.array(correct_P),
-        decimal=10
-    )
-    gv.xp.testing.assert_array_almost_equal(
-        condorcet_model.stationary_distribution,
-        xp.array([1.0/3.0,1.0/3.0,1.0/3.0]),
-        decimal=10
-    )
-    mc=condorcet_model.MarkovChain
-    alt = mc.solve_for_unit_eigenvector()
-    gv.xp.testing.assert_array_almost_equal(
-        alt,
-        xp.array([1.0/3.0,1.0/3.0,1.0/3.0]),
-        decimal=10
-    )
 
-# attempt to replicate grid boundary probability and entropy (H) from 
-# Brewer, Juybari, Moberly (2023), J. Econ Interact Coord, Tab.5
-# grid size 20 only
-# https://link.springer.com/article/10.1007/s11403-023-00387-8/tables/5
-@pytest.mark.parametrize("params,correct", [
-    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'entropy': 10.32}),
-    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'entropy':  9.68})
-])
-def test_replicate_spatial_voting_analysis(params, correct):
-    import gridvoting as gv
-    np = gv.np
-    xp = gv.xp
-    g = params['g']
-    zi = params['zi']
-    majority = 2
-    grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
-    number_of_alternatives = (2*g+1)*(2*g+1)
-    assert len(grid.x) == number_of_alternatives
-    assert len(grid.y) == number_of_alternatives
-    on_grid_boundary = (grid.x == -g) | \
-                    (grid.x == g) | \
-                    (grid.y == -g) | \
-                    (grid.y == g)
-    assert on_grid_boundary.shape == (number_of_alternatives,)
-    voter_ideal_points = np.array([
-        [-15,-9],
-        [0,17],
-        [15,-9]
-    ])
-    number_of_voters = 3
-    assert voter_ideal_points.shape == (3,2)
-    u = grid.spatial_utilities(
-        voter_ideal_points=voter_ideal_points,
-        metric='sqeuclidean'
-    )
-    assert u.shape == (number_of_voters, number_of_alternatives)
-    vm = gv.VotingModel(
-        utility_functions=u,
-        majority=majority,
-        zi=zi,
-        number_of_voters=number_of_voters,
-        number_of_feasible_alternatives=number_of_alternatives
-    )
-    vm.analyze()
-    stat_dist = vm.stationary_distribution
-    assert stat_dist.sum() == pytest.approx(1.0,abs=1e-9)
-    p_boundary = sum(stat_dist[on_grid_boundary])
-    assert p_boundary == pytest.approx(correct['p_boundary'], rel=0.05)
-    stat_dist_gz = stat_dist[stat_dist>0.0]
-    entropy = -stat_dist_gz.dot(np.log2(stat_dist_gz))
-    assert entropy == pytest.approx(correct['entropy'], abs=0.01)
-    stat_dist_algebraic = xp.asnumpy(vm.MarkovChain.solve_for_unit_eigenvector())
-    l1_power_vs_algebraic_solns = np.linalg.norm(stat_dist-stat_dist_algebraic, ord=1)
-    assert l1_power_vs_algebraic_solns < 1e-9
