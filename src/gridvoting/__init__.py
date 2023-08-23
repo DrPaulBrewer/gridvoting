@@ -92,9 +92,9 @@ class Grid:
         assert len(indexes) == 1
         return indexes[0]
 
-    def embedding(self, *, valid, fill=0.0):
+    def embedding(self, *, valid):
         """
-        returns an embedding function efunc from 1D arrays of size sum(valid)
+        returns an embedding function efunc(z,fill=0.0) from 1D arrays z of size sum(valid)
         to arrays of size self.len
 
         valid is a np.array of type boolean, of size self.len
@@ -108,7 +108,7 @@ class Grid:
         assert self.len == len(valid)
         correct_z_len = valid.sum()
 
-        def efunc(z):
+        def efunc(z, fill=0.0):
             assert len(z) == correct_z_len
             v = np.full(self.len, fill)
             v[valid] = z
