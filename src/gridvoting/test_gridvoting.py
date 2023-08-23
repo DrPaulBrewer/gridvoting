@@ -59,6 +59,105 @@ def test_grid_init():
     np.testing.assert_array_equal(grid.y.reshape(grid.gshape), correct_grid_y)
  
 
+def test_grid_as_xy_vectors():
+    import gridvoting as gv
+    np = gv.np
+    grid = gv.Grid(x0=-3,x1=3,y0=-5,y1=5)
+    correct_vectors = np.array([
+       [-3,  5],
+       [-2,  5],
+       [-1,  5],
+       [ 0,  5],
+       [ 1,  5],
+       [ 2,  5],
+       [ 3,  5],
+       [-3,  4],
+       [-2,  4],
+       [-1,  4],
+       [ 0,  4],
+       [ 1,  4],
+       [ 2,  4],
+       [ 3,  4],
+       [-3,  3],
+       [-2,  3],
+       [-1,  3],
+       [ 0,  3],
+       [ 1,  3],
+       [ 2,  3],
+       [ 3,  3],
+       [-3,  2],
+       [-2,  2],
+       [-1,  2],
+       [ 0,  2],
+       [ 1,  2],
+       [ 2,  2],
+       [ 3,  2],
+       [-3,  1],
+       [-2,  1],
+       [-1,  1],
+       [ 0,  1],
+       [ 1,  1],
+       [ 2,  1],
+       [ 3,  1],
+       [-3,  0],
+       [-2,  0],
+       [-1,  0],
+       [ 0,  0],
+       [ 1,  0],
+       [ 2,  0],
+       [ 3,  0],
+       [-3, -1],
+       [-2, -1],
+       [-1, -1],
+       [ 0, -1],
+       [ 1, -1],
+       [ 2, -1],
+       [ 3, -1],
+       [-3, -2],
+       [-2, -2],
+       [-1, -2],
+       [ 0, -2],
+       [ 1, -2],
+       [ 2, -2],
+       [ 3, -2],
+       [-3, -3],
+       [-2, -3],
+       [-1, -3],
+       [ 0, -3],
+       [ 1, -3],
+       [ 2, -3],
+       [ 3, -3],
+       [-3, -4],
+       [-2, -4],
+       [-1, -4],
+       [ 0, -4],
+       [ 1, -4],
+       [ 2, -4],
+       [ 3, -4],
+       [-3, -5],
+       [-2, -5],
+       [-1, -5],
+       [ 0, -5],
+       [ 1, -5],
+       [ 2, -5],
+       [ 3, -5]
+    ])
+    np.testing.assert_array_equal(
+        grid.as_xy_vectors(),
+        correct_vectors
+    )
+
+@pytest.mark.parametrize("x0,x1,xstep,y0,y1,ystep,correct",[
+    (None,None,None,None,None,None,(10,6)),
+    (0,0,None,0,0,None,(1,1)),
+    (-5,5,None,-20,20,2,(21,11)),
+    (1,4,None,None,None,None,(10,4))
+])
+def test_grid_shape(x0,x1,xstep,y0,y1,ystep,correct):
+    import gridvoting as gv
+    grid = gv.Grid(x0=0,x1=5,y0=0,y1=9)
+    assert grid.shape(x0=x0,x1=x1,xstep=xstep,y0=y0,y1=y1,ystep=ystep) == correct
+
 def test_grid_spatial_utility():
     # this also tests gridvoting github issue #10
     import gridvoting as gv
