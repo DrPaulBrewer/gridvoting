@@ -1,6 +1,6 @@
 # gridvoting
 
-This software is a library module for our [research publication (open-access)](https://doi.org/10.1007/s11403-023-00387-8):
+This software began as a library module for our [research publication (open-access)](https://doi.org/10.1007/s11403-023-00387-8):
 <pre>
   Brewer, P., Juybari, J. & Moberly, R. 
   A comparison of zero- and minimal-intelligence agendas in majority-rule voting models. 
@@ -161,6 +161,7 @@ Instance Properties:
   - grid.gshape -- natural shape (number_of_rows,number_of_cols) where rows represent y-axis and cols represent x-axis
   - grid.extent -- equal to the tuple (x0,x1,y0,y1) for use with matplotlib.pyplot.plt
   - grid.len -- equal to the number of points on the grid
+  - grid.boundary -- a 1D numpy boolean array, equal to ((grid.x==x0) | (grid.x==x1) | (grid.y==y0) | (grid.y==y1))
 
 #### methods
 
@@ -187,12 +188,12 @@ and vectors will be an array of 165 2D coordinates
 
 returns an embedding function efunc
 
-efunc maps 1D arrays of size sum(valid)
-to arrays of size grid.len
+efunc maps 1D arrays of size `valid.sum()`
+to arrays of size `grid.len`
 
 `valid` is a boolean array of length grid.len used to select the grid points 
 associated with the embedded shape.  This can be constructed from conditions
-on `grid.x`, `grid.y`, methods `grid.within_box` and `grid.within_disk` (see below), 
+on `grid.x`, `grid.y`, methods `grid.within_box`, `grid.within_disk`, `grid.within_triangle` (see below), 
 and appropriate boolean operators.
 
 `fill` is used to set the value in the region where `valid` is `False`.
@@ -247,10 +248,10 @@ print(grid.as_xy_vectors()[triangle])
  [3 0]
  [4 0]]
 # grid.embedding creates a function from arrays of 15 entries to arrays of 165 entries
-emfunc = grid.embedding(valid=triangle, fill=0.0)
+emfunc = grid.embedding(valid=triangle)
 triangle_x = grid.x[triangle] # [0 0 1 0 1 2 0 1 2 3 0 1 2 3 4]
 # embedding triangle_x into the grid will give a function that is 0 except in the triangle, where it is x
-print(emfunc(triangle_x).reshape(grid.gshape))
+print(emfunc(triangle_x, fill=0.0).reshape(grid.gshape))
 [[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
  [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
  [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
@@ -285,7 +286,7 @@ print(idx)
 `idx` will be 12, because `[-4,6]` is entry [12] of `grid.as_xy_vectors()`
 
 ----
-`grid.plot(title=None, cmap=<matplotlib.colors.LinearSegmentedColormap object at 0x7ff3fa5dbca0>, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
+`grid.plot(title=None, cmap=cm.gray_r, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
 
 Creates a plot 
 
@@ -319,6 +320,14 @@ Internally, this method calls `scipy.spatial.distance.cdist` where the [metrics 
 
  returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk
 
+ ----
+
+ `grid.within_triangle(points)`
+
+`points` should have shape `(3,2)`
+
+ returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined triangle
+
 ----
 
 ### class VotingModel
@@ -341,7 +350,7 @@ gridvoting.VotingModel(
 
 `what_beats(index)`
 
-`what_is_beaten_by(index)`git p
+`what_is_beaten_by(index)`
 
 ```
 plots(
