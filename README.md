@@ -286,7 +286,7 @@ print(idx)
 `idx` will be 12, because `[-4,6]` is entry [12] of `grid.as_xy_vectors()`
 
 ----
-`grid.plot(title=None, cmap=<matplotlib.colors.LinearSegmentedColormap object at 0x7ff3fa5dbca0>, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
+`grid.plot(title=None, cmap=cm.gray_r, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
 
 Creates a plot 
 
