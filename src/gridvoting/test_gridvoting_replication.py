@@ -45,10 +45,10 @@ def test_replicate_spatial_voting_analysis(params, correct):
     vm.analyze()
     stat_dist = vm.stationary_distribution
     assert stat_dist.sum() == pytest.approx(1.0,abs=1e-9)
-    p_boundary = sum(stat_dist[grid.boundary])
+    p_boundary = stat_dist[grid.boundary].sum()
     assert p_boundary == pytest.approx(correct['p_boundary'], rel=0.05)
     triangle_of_voter_ideal_points = grid.within_triangle(points=voter_ideal_points)
-    p_voter_ideal_point_triangle = sum(stat_dist[triangle_of_voter_ideal_points])
+    p_voter_ideal_point_triangle = stat_dist[triangle_of_voter_ideal_points].sum()
     assert p_voter_ideal_point_triangle == pytest.approx(correct['p_voter_ideal_point_triangle'], rel=0.05)
     stat_dist_gz = stat_dist[stat_dist>0.0]
     entropy = -stat_dist_gz.dot(np.log2(stat_dist_gz))

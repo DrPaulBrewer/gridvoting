@@ -197,7 +197,7 @@ def test_grid_embedding():
     [False, False, False, False, False, False, False, False, False, False, False]
     ])
     np.testing.assert_array_equal(triangle.reshape(grid.gshape),correct_triangle)
-    assert 15 == sum(triangle)
+    assert 15 == triangle.sum()
     triangle_points_xy = grid.as_xy_vectors()[triangle]
     correct_triangle_points_xy = np.array([
         [0,4],

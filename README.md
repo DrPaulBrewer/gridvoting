@@ -188,12 +188,12 @@ and vectors will be an array of 165 2D coordinates
 
 returns an embedding function efunc
 
-efunc maps 1D arrays of size sum(valid)
-to arrays of size grid.len
+efunc maps 1D arrays of size `valid.sum()`
+to arrays of size `grid.len`
 
 `valid` is a boolean array of length grid.len used to select the grid points 
 associated with the embedded shape.  This can be constructed from conditions
-on `grid.x`, `grid.y`, methods `grid.within_box` and `grid.within_disk` (see below), 
+on `grid.x`, `grid.y`, methods `grid.within_box`, `grid.within_disk`, `grid.within_triangle` (see below), 
 and appropriate boolean operators.
 
 `fill` is used to set the value in the region where `valid` is `False`.
@@ -350,7 +350,7 @@ gridvoting.VotingModel(
 
 `what_beats(index)`
 
-`what_is_beaten_by(index)`git p
+`what_is_beaten_by(index)`
 
 ```
 plots(
