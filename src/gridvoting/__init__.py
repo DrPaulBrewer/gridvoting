@@ -86,6 +86,29 @@ class Grid:
         ).flatten()
         assert mask.shape == (self.len,)
         return mask
+    
+    def within_triangle(self,*,points):
+        """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined triangle"""
+        assert points.shape == (3,2)
+        barycentric_to_cartesian_matrix = np.row_stack((points[:,0],points[:,1],np.ones(points.shape[0])))
+        assert barycentric_to_cartesian_matrix.shape == (3,3)
+        cartesian_to_barycentrix_matrix = np.linalg.inv(barycentric_to_cartesian_matrix)
+        mask = np.logical_not(
+            np.any(
+                np.dot(
+                    cartesian_to_barycentrix_matrix,
+                    np.row_stack(
+                        (
+                        self.x,
+                        self.y,
+                        np.ones(self.len)
+                        )
+                    )
+                ) < (-1e-10),
+            axis=0)
+        )
+        assert mask.shape == (self.len,)
+        return mask 
 
     def index(self, *, x, y):
         """returns the unique 1D array index for grid point (x,y)"""

@@ -320,6 +320,14 @@ Internally, this method calls `scipy.spatial.distance.cdist` where the [metrics 
 
  returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk
 
+ ----
+
+ `grid.within_triangle(points)`
+
+`points` should have shape `(3,2)`
+
+ returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined triangle
+
 ----
 
 ### class VotingModel

@@ -244,6 +244,37 @@ def test_grid_embedding():
         correct_embedding_result
     )
 
+def test_grid_within_triangle_many_right_triangles():
+    import gridvoting as gv
+    np = gv.np
+    grid = gv.Grid(x0=0,y0=0,x1=100,y1=100)
+    for cx in range(0,80,5):
+        for cy in range(0,80,5):
+            ax = cx
+            by = cy
+            for ay in range(cy+1,100,7):
+                for bx in range(cx+1,100,7):
+                    points = np.array([
+                        [ax,ay],
+                        [bx,by],
+                        [cx,cy]
+                    ])
+                    slope = (0.0+by-ay)/(0.0+bx-ax)
+                    assert slope<0.0
+                    # add slight bias to account for floating-point roundoff error
+                    correct_triangle = (grid.x>=cx) & (grid.y>=cy) & (grid.y<=(1e-10+ay+slope*(grid.x-ax)))
+                    calc_triangle_A = grid.within_triangle(points=points)
+                    altpoints = np.array([
+                        [cx,cy],
+                        [ax,ay],
+                        [bx,by]
+                    ])
+                    calc_triangle_B = grid.within_triangle(points=altpoints)
+                    unusual = (calc_triangle_A != correct_triangle) | (calc_triangle_B != correct_triangle)
+                    if unusual.sum()>0:
+                        disagree = grid.as_xy_vectors()[unusual][0,:]
+                        raise Exception("input={points},disagreement={disagree}".format(points=points,disagree=disagree))
+                    
 def test_grid_spatial_utility():
     # this also tests gridvoting github issue #10
     import gridvoting as gv
