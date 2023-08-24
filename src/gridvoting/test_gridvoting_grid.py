@@ -216,6 +216,7 @@ def test_grid_embedding():
         [3,0],
         [4,0]
     ])
+    np.testing.assert_array_equal(triangle_points_xy,correct_triangle_points_xy)
     emfunc = grid.embedding(valid=triangle)
     triangle_x = grid.x[triangle]
     np.testing.assert_array_equal(
