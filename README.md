@@ -1,6 +1,6 @@
 # gridvoting
 
-This software is a library module for our [research publication (open-access)](https://doi.org/10.1007/s11403-023-00387-8):
+This software began as a library module for our [research publication (open-access)](https://doi.org/10.1007/s11403-023-00387-8):
 <pre>
   Brewer, P., Juybari, J. & Moberly, R. 
   A comparison of zero- and minimal-intelligence agendas in majority-rule voting models. 

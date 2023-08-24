@@ -2,11 +2,15 @@ import pytest
 
 # attempt to replicate grid boundary probability and entropy (H) from 
 # Brewer, Juybari, Moberly (2023), J. Econ Interact Coord, Tab.5
-# grid size 20 only
 # https://link.springer.com/article/10.1007/s11403-023-00387-8/tables/5
+# grid size 20 only active for testing
+# grid size 40 is commented out because of low RAM on github actions but can be tested manually by removing '#'
+
 @pytest.mark.parametrize("params,correct", [
-    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'entropy': 10.32}),
-    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'entropy':  9.68})
+    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'p_voter_ideal_point_triangle': 0.458, 'entropy': 10.32}),
+    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'p_voter_ideal_point_triangle': 0.68, 'entropy':  9.68}),
+#   ({'g':40,'zi':False}, {'p_boundary': 0.000254, 'p_voter_ideal_point_triangle':0.396, 'entropy': 10.92}),
+#   ({'g':40,'zi':True},  {'p_boundary': 2.55e-05, 'p_voter_ideal_point_triangle':0.675, 'entropy': 9.82})
 ])
 def test_replicate_spatial_voting_analysis(params, correct):
     import gridvoting as gv
@@ -43,6 +47,9 @@ def test_replicate_spatial_voting_analysis(params, correct):
     assert stat_dist.sum() == pytest.approx(1.0,abs=1e-9)
     p_boundary = sum(stat_dist[grid.boundary])
     assert p_boundary == pytest.approx(correct['p_boundary'], rel=0.05)
+    triangle_of_voter_ideal_points = grid.within_triangle(points=voter_ideal_points)
+    p_voter_ideal_point_triangle = sum(stat_dist[triangle_of_voter_ideal_points])
+    assert p_voter_ideal_point_triangle == pytest.approx(correct['p_voter_ideal_point_triangle'], rel=0.05)
     stat_dist_gz = stat_dist[stat_dist>0.0]
     entropy = -stat_dist_gz.dot(np.log2(stat_dist_gz))
     assert entropy == pytest.approx(correct['entropy'], abs=0.01)
