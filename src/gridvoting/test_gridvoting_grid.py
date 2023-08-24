@@ -244,6 +244,30 @@ def test_grid_embedding():
         correct_embedding_result
     )
 
+def test_grid_within_box():
+    import gridvoting as gv
+    np = gv.np
+    grid = gv.Grid(x0=0,y0=0,x1=100,y1=100)
+    box = grid.within_box(x0=20,y0=20,x1=30,y1=40)
+    assert box.shape == (grid.len,)
+    assert box.sum() == 21*11
+    assert grid.x[box].shape == (21*11,)
+    equiv_grid = gv.Grid(x0=20,y0=20,x1=30,y1=40)
+    np.testing.assert_array_equal(grid.x[box],equiv_grid.x)
+    np.testing.assert_array_equal(grid.y[box],equiv_grid.y)
+
+def test_grid_within_disk():
+    import gridvoting as gv
+    np = gv.np
+    grid = gv.Grid(x0=0,y0=0,x1=100,y1=100)
+    disk = grid.within_disk(x0=30,y0=40,r=50)
+    assert grid.x[disk][0] == 30
+    assert grid.y[disk][0] == 90
+    assert grid.y[disk][-1] == 0
+    correct_disk = ((grid.x-30)*(grid.x-30)+(grid.y-40)*(grid.y-40)<=(50*50))
+    np.testing.assert_array_equal(disk,correct_disk)
+
+
 def test_grid_within_triangle_many_right_triangles():
     import gridvoting as gv
     np = gv.np
