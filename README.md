@@ -30,7 +30,7 @@ The software has also run (without Colab) on a local computer with a Nvidia gami
   - pandas
   - matplotlib
   - scipy
-  - cupy (preinstalled on Google Colab GPU machines; optional when GPU is absent)
+  - cupy (preinstalled on Google Colab GPU machines; omitted when GPU is absent)
 * familiarity with Python language / scientific computing / gpu Nvidia-CUDA setup
 
 It will run faster with a GPU than on CPU alone, we saw a 10-30x speedup at times. In one case, an Nvidia A100-40GB GPU would 
