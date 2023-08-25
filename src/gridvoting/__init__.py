@@ -373,7 +373,7 @@ class VotingModel:
         voter_ideal_points,
         diagnostics=False,
         log=True,
-        embedding=lambda z: z,
+        embedding=lambda z, fill: z,
         zoomborder=0,
         dpi=72,
         figsize=(10, 10),
@@ -398,7 +398,7 @@ class VotingModel:
 
         if self.core_exists:
             grid.plot(
-                embedding(self.core_points.astype("int")),
+                embedding(self.core_points.astype("int"), fill=np.nan),
                 log=log,
                 points=voter_ideal_points,
                 zoom=True,
@@ -441,7 +441,8 @@ class VotingModel:
             if grid is not None:
                 grid.plot(
                     embedding(
-                        cp.asnumpy(self.MarkovChain.unreachable_points).astype("int"),
+                        xp.asnumpy(self.MarkovChain.unreachable_points).astype("int"),
+                        fill=np.nan
                     ),
                     log=log,
                     title=title_unreachable_points,
@@ -457,7 +458,7 @@ class VotingModel:
             _save("stationary_distribubtion_no_grid.png")
         else:
             grid.plot(
-                embedding(z),
+                embedding(z, fill=np.nan),
                 log=log,
                 points=voter_ideal_points,
                 title=title_stationary_distribution,
@@ -467,7 +468,7 @@ class VotingModel:
             )
             if voter_ideal_points is not None:
                 grid.plot(
-                    embedding(z),
+                    embedding(z, fill=np.nan),
                     log=log,
                     points=voter_ideal_points,
                     zoom=True,
