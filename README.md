@@ -15,6 +15,65 @@ improve the fairness or reasonableness of outcomes.  We're not claiming adding i
 cannot deduce such generalities from a few simulations. But in some well-known scenarios, the simulations demonstrate cases where
 adding intelligence to the voting agenda can increase the variance and decrease the equality of outcomes for equally situated agents.
 
+## use of Google Colab
+
+We used [Google Colab](https://colab.google), a cloud-based service that runs Python-based analyses on Google's servers and GPUs,
+for conducting most of the research reported in the publication above.  When using Google Colab, the local computer does NOT need to have a GPU.
+
+The software has also run (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
+
+## requirements
+* For GPU machines, Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
+* Python 3 
+* these Python-3 scientific computing modules (except on Google Colab, where these are all preinstalled):
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - cupy (preinstalled on Google Colab GPU machines; optional when GPU is absent)
+* familiarity with Python language / scientific computing / gpu Nvidia-CUDA setup
+
+It will run faster with a GPU than on CPU alone, we saw a 10-30x speedup at times. In one case, an Nvidia A100-40GB GPU would 
+run in 30 seconds what was taking 10 minutes on 12 CPU cores.
+
+## installation
+
+on Google Colab:
+```
+!pip install gridvoting
+```
+If you use a Google Colab runtime that includes a GPU, gridvoting should recognize it.
+It will run, but slowly, on standard Colab machines that lack a GPU.
+
+----
+
+on windows, linux, or macos:
+
+If you have a GPU, be sure to check/install Nvidia Cuda drivers and matching cupy python module.
+To install the gridvoting module:
+```
+python3 -m pip install --user gridvoting
+```
+
+## tests
+
+To run our automated tests and generate a test report, run the following commands:
+
+on Google Colab:
+```
+!pip install gridvoting
+!cd /usr/local/lib/python3.10/dist-packages/gridvoting && python3 -m pytest -sv .
+```
+Note that `/usr/local/lib/python3.10/dist-packages/gridvoting` is the usual installation location on Colab.
+If gridvoting is installed elsewhere, you can find it in Colab with `!find / -name gridvoting`
+
+on windows, linux, or macos, 
+1. install pytest, cupy, and gridvoting as necessary
+2. find where gridvoting is installed
+3. cd to that directory
+4. to run the test use this command:  `python3 -m pytest -sv .`
+
+
 ## License
 
 The software is provided under the standard [MIT License](./LICENSE.md). 
@@ -28,12 +87,9 @@ others know it is not the original.  See the LICENSE file for more details.
 The software is provided in the hope that it may be useful to others, but it is not a full featured turnkey
 system for conducting arbitrary voting simulations. Additional coding is required to define a specific simulation.
 
-Testing of the software is limited.  While there are some runtime assertion tests in the software, we do not include a fully automated test suite 
-because our free testing provider does not include a GPU in the test environment.  
-
-Some manual post-build testing has been done, but is not extensive.  
-
-As with any code where extensive testing is not done, it may contain bugs, unexpected behaviors, or have other issues.
+Beginning with version 0.50.0, automated tests exist on linux, windows. and macOS.  These tests ideally run on GitHub Actions each time
+a change is made in the software. This cannot guarantee that the software is free of "bugs" or defects or that it will run on your computer
+without adjustments.  
 
 The [MIT License](./LICENSE.md) also includes this disclaimer: 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -46,25 +102,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Code specific to the spatial voting and budget voting portions of our research publication above -- as well as output data -- 
 is deposited at: [OSF Dataset for A comparison of zero and minimal Intelligence agendas in majority rule voting models](https://osf.io/k2phe/)
 and is freely available.
-
-## use of Google Colab
-
-We used [Google Colab](https://colab.google), a cloud-based service that runs Python-based analyses on Google's servers and GPUs,
-for conducting most of the research reported in the publication above.  When using Google Colab, the local computer does NOT need to have a GPU.
-
-The software has also run (without Colab) on a local computer with a Nvidia gaming GPU, and remote computers with industrial Nvidia A100 GPUs.
-
-## requirements
-* Nvidia GPU with minimum of 16GB GPU memory to duplicate simulations reported in the above paper
-* Nvidia CUDA drivers (except on Google Colab, where CUDA is pre-installed)
-* Python 3 
-* **all** of these Python-3 scientific computing modules (except on Google Colab, where these are all preinstalled on GPU instances):
-  - numpy
-  - pandas
-  - matplotlib
-  - scipy
-  - cupy
-* familiarity with Python language / scientific computing / gpu Nvidia-CUDA setup
 
 ## Random sequential voting simulations
 
