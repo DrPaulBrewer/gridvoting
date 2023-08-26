@@ -324,7 +324,7 @@ class MarkovChainCPUGPU:
         metrics = {
             '||F||': self.P.shape[0],
             'power': self.power,
-            '(𝝨𝝿)-1':  self.stationary_distribution.sum()-1.0,
+            '(𝝨𝝿)-1':  float(self.stationary_distribution.sum())-1.0, # cast to float to avoid cupy array singleton
             '||𝝿P-𝝿||_L1_norm': self.L1_norm_of_single_step_change(
                               self.stationary_distribution
                           )
