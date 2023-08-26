@@ -218,10 +218,9 @@ def assert_zero_diagonal_int_matrix(M):
     assert rows == cols
     xp.testing.assert_array_equal(xp.diagonal(M), xp.zeros(shape=(rows), dtype=int))
 
-
-class MarkovChainGPU:
+class MarkovChainCPUGPU:
     def __init__(self, *, P, computeNow=True, tolerance=1e-10):
-        """initializes a MarkovChainGPU instance by copying in the transition
+        """initializes a MarkovChainCPUGPU instance by copying in the transition
         matrix P and calculating chain properties"""
         self.P = xp.asarray(P)  # copy transition matrix to cudapy as necessary
         assert_valid_transition_matrix(P)
@@ -309,10 +308,34 @@ class MarkovChainGPU:
                 unconverged = self.check_norm > tolerance
 
         self.power = power
-        self.stationary_diagnostics = diags
+        self.power_method_diagnostics = diags
         del cP_LT
         return self.stationary_distribution
 
+    def L1_norm_comparing_stationary_distributions(self,*,other):
+        """returns L1 norm ||𝝿_power_method-𝝿_other|| """
+        assert self.stationary_distribution.shape == other.shape
+        return float(  # cast to float to avoid single-element array
+          xp.linalg.norm(self.stationary_distribution-other, ord=1)
+        )
+
+    def diagnostic_metrics(self,*,danger=False):
+        """ return Markov chain approximation metrics in mathematician-friendly format """
+        metrics = {
+            '||F||': self.P.shape[0],
+            'power': self.power,
+            '(𝝨𝝿)-1':  self.stationary_distribution.sum()-1.0,
+            '||𝝿P-𝝿||_L1_norm': self.L1_norm_of_single_step_change(
+                              self.stationary_distribution
+                          )
+        }
+        # the following can crash (memory). Explicitly request with danger=True
+        if danger:
+            metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] = \
+                self.L1_norm_comparing_stationary_distributions(
+                    other=self.solve_for_unit_eigenvector()
+                )
+        return metrics
 
 class VotingModel:
     def __init__(
@@ -340,8 +363,11 @@ class VotingModel:
         self.zi = zi
         self.analyzed = False
 
+    def E_𝝿(self,z):
+        return np.dot(self.stationary_distribution,z)
+
     def analyze(self):
-        self.MarkovChain = MarkovChainGPU(P=self._get_transition_matrix())
+        self.MarkovChain = MarkovChainCPUGPU(P=self._get_transition_matrix())
         self.core_points = xp.asnumpy(self.MarkovChain.absorbing_points)
         self.core_exists = np.any(self.core_points)
         if not self.core_exists:
@@ -365,6 +391,46 @@ class VotingModel:
         points = xp.asnumpy(self.MarkovChain.P[:, index] > 0).astype("int")
         points[index] = 0
         return points
+        
+    def summarize_in_context(self,*,grid,valid=None):
+        """calculate summary statistics for stationary distribution using grid's coordinates and optional subset valid"""
+        # missing valid defaults to all True array for grid
+        valid = np.full((grid.len,), True) if valid is None else valid
+        # check valid array shape 
+        assert valid.shape == (grid.len,)
+        # check that the number of valid points matches the dimensionality of the stationary distribution
+        assert (valid.sum(),) == self.stationary_distribution.shape
+        # get X and Y coordinates for valid grid points
+        validX = grid.x[valid]
+        validY = grid.y[valid]
+        validXY_vectors = grid.as_xy_vectors()[valid]
+        x_mean = self.E_𝝿(validX)
+        x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
+        x_sd   = np.sqrt(x_var)
+        y_mean = self.E_𝝿(validY)
+        y_var  = self.E_𝝿(np.power(validY-y_mean, 2))
+        y_sd   = np.sqrt(y_var)
+        prob_min = self.stationary_distribution.min()
+        at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
+        prob_min_points = validXY_vectors[at_prob_min,:]
+        prob_max = self.stationary_distribution.max()
+        at_prob_max = np.abs(prob_max-self.stationary_distribution)<1e-10
+        prob_max_points = validXY_vectors[at_prob_max,:]
+        _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
+        entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
+        return {
+            'x_mean': x_mean,
+            'x_var': x_var,
+            'x_sd': x_sd,
+            'y_mean': y_mean,
+            'y_var': y_var,
+            'y_sd': y_sd,
+            'prob_min': prob_min,
+            'prob_min_points': prob_min_points,
+            'prob_max': prob_max,
+            'prob_max_points': prob_max_points,
+            'entropy_bits': entropy_bits 
+        }
 
     def plots(
         self,
@@ -409,7 +475,7 @@ class VotingModel:
             )
             return None  # when core exists abort as additional plots undefined
         if diagnostics:
-            df = pd.DataFrame(self.MarkovChain.stationary_diagnostics)
+            df = pd.DataFrame(self.MarkovChain.power_method_diagnostics)
             df.plot.scatter(
                 "power", "sad", loglog=True, title=title_sad, figsize=figsize
             )
