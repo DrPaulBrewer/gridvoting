@@ -44,15 +44,18 @@ def test_replicate_spatial_voting_analysis(params, correct):
     )
     vm.analyze()
     stat_dist = vm.stationary_distribution
-    assert stat_dist.sum() == pytest.approx(1.0,abs=1e-9)
     p_boundary = stat_dist[grid.boundary].sum()
     assert p_boundary == pytest.approx(correct['p_boundary'], rel=0.05)
     triangle_of_voter_ideal_points = grid.within_triangle(points=voter_ideal_points)
     p_voter_ideal_point_triangle = stat_dist[triangle_of_voter_ideal_points].sum()
     assert p_voter_ideal_point_triangle == pytest.approx(correct['p_voter_ideal_point_triangle'], rel=0.05)
-    stat_dist_gz = stat_dist[stat_dist>0.0]
-    entropy = -stat_dist_gz.dot(np.log2(stat_dist_gz))
-    assert entropy == pytest.approx(correct['entropy'], abs=0.01)
-    stat_dist_algebraic = xp.asnumpy(vm.MarkovChain.solve_for_unit_eigenvector())
-    l1_power_vs_algebraic_solns = np.linalg.norm(stat_dist-stat_dist_algebraic, ord=1)
-    assert l1_power_vs_algebraic_solns < 1e-9
+    diagnostic_metrics = vm.MarkovChain.diagnostic_metrics(danger=True)
+    assert diagnostic_metrics['||F||'] == number_of_alternatives
+    assert diagnostic_metrics['(𝝨𝝿)-1'] == pytest.approx(0.0,abs=1e-0)
+    assert diagnostic_metrics['||𝝿P-𝝿||_L1_norm'] < 1e-9
+    assert diagnostic_metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] < 1e-9
+    summary = vm.summarize_in_context(grid=grid)
+    assert summary['entropy_bits'] == pytest.approx(correct['entropy'],abs=0.01)
+    assert summary['x_mean'] == pytest.approx(0.0,abs=0.01)
+    assert summary['y_mean'] == pytest.approx(-0.333,abs=0.01)
+    np.testing.assert_array_equal(summary['prob_max_points'],[[0,-1]])
