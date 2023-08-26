@@ -319,7 +319,7 @@ class MarkovChainCPUGPU:
           xp.linalg.norm(self.stationary_distribution-other, ord=1)
         )
 
-    def diagnostic_metrics(danger=False):
+    def diagnostic_metrics(self,*,danger=False):
         """ return Markov chain approximation metrics in mathematician-friendly format """
         metrics = {
             '||F||': self.P.shape[0],
