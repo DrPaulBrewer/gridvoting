@@ -411,10 +411,10 @@ class VotingModel:
         y_var  = self.E_𝝿(np.power(validY-y_mean, 2))
         y_sd   = np.sqrt(y_var)
         prob_min = self.stationary_distribution.min()
-        at_prob_min = np.abs(prob_min-vm.stationary_distribution)<1e-10
+        at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
         prob_min_points = validXY_vectors[at_prob_min,:]
         prob_max = self.stationary_distribution.max()
-        at_prob_max = np.abs(prob_max-vm.stationary_distribution)<1e-10
+        at_prob_max = np.abs(prob_max-self.stationary_distribution)<1e-10
         prob_max_points = validXY_vectors[at_prob_max,:]
         _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
