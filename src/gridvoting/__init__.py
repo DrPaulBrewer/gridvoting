@@ -313,14 +313,11 @@ class MarkovChainCPUGPU:
         del cP_LT
         return self.stationary_distribution
 
-    def L1_norm_comparing_stationary_distributions(self):
-        """returns L1 norm ||𝝿_power_method-𝝿_algebraic_method|| """
+    def L1_norm_comparing_stationary_distributions(self,*,other):
+        """returns L1 norm ||𝝿_power_method-𝝿_other|| """
+        assert self.stationary_distribution.shape == other.shape
         return float(  # cast to float to avoid single-element array
-          xp.linalg.norm(
-              self.stationary_distribution-
-              self.solve_for_unit_eigenvector(),
-              ord=1
-          )
+          xp.linalg.norm(self.stationary_distribution-other, ord=1)
         )
 
     def diagnostic_metrics(danger=False):
@@ -335,13 +332,10 @@ class MarkovChainCPUGPU:
         }
         # the following can crash (memory). Explicitly request with danger=True
         if danger:
-            metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] = float(
-              xp.linalg.norm(
-                      vm.MarkovChain.stationary_distribution-
-                      vm.MarkovChain.solve_for_unit_eigenvector(),
-                  ord=1
-              )
-        )
+            metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] = 
+                self.L1_norm_comparing_stationary_distributions(
+                    other=self.solve_for_unit_eigenvector()
+                )
         return metrics
 
 class VotingModel:
