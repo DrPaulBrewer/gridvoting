@@ -1,16 +1,17 @@
 import pytest
 
 # attempt to replicate grid boundary probability and entropy (H) from 
-# Brewer, Juybari, Moberly (2023), J. Econ Interact Coord, Tab.5
+# Brewer, Juybari, Moberly (2023), J. Econ Interact Coord, Tab.4-5
+# https://link.springer.com/article/10.1007/s11403-023-00387-8/tables/4
 # https://link.springer.com/article/10.1007/s11403-023-00387-8/tables/5
 # grid size 20 only active for testing
 # grid size 40 is commented out because of low RAM on github actions but can be tested manually by removing '#'
 
 @pytest.mark.parametrize("params,correct", [
-    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'p_voter_ideal_point_triangle': 0.458, 'entropy': 10.32}),
-    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'p_voter_ideal_point_triangle': 0.68, 'entropy':  9.68}),
-#   ({'g':40,'zi':False}, {'p_boundary': 0.000254, 'p_voter_ideal_point_triangle':0.396, 'entropy': 10.92}),
-#   ({'g':40,'zi':True},  {'p_boundary': 2.55e-05, 'p_voter_ideal_point_triangle':0.675, 'entropy': 9.82})
+    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'p_voter_ideal_point_triangle': 0.458, 'entropy': 10.32, 'y_mean': -0.1452}),
+    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'p_voter_ideal_point_triangle': 0.68, 'entropy':  9.68, 'y_mean': -0.2937}),
+#   ({'g':40,'zi':False}, {'p_boundary': 0.000254, 'p_voter_ideal_point_triangle':0.396, 'entropy': 10.92, 'y_mean': -0.3373}),
+#   ({'g':40,'zi':True},  {'p_boundary': 2.55e-05, 'p_voter_ideal_point_triangle':0.675, 'entropy': 9.82, 'y_mean': -0.3428})
 ])
 def test_replicate_spatial_voting_analysis(params, correct):
     import gridvoting as gv
@@ -57,5 +58,5 @@ def test_replicate_spatial_voting_analysis(params, correct):
     summary = vm.summarize_in_context(grid=grid)
     assert summary['entropy_bits'] == pytest.approx(correct['entropy'],abs=0.01)
     assert summary['x_mean'] == pytest.approx(0.0,abs=0.01)
-    assert summary['y_mean'] == pytest.approx(-0.333,abs=0.01)
+    assert summary['y_mean'] == pytest.approx(correct['y_mean'], abs=0.001)
     np.testing.assert_array_equal(summary['prob_max_points'],[[0,-1]])
