@@ -320,7 +320,7 @@ class MarkovChainCPUGPU:
         )
 
     def diagnostic_metrics(danger=False):
-        ''' return math metrics in mathematician-friendly format
+        """ return Markov chain approximation metrics in mathematician-friendly format """
         metrics = {
             '||F||': self.P.shape[0],
             'power': self.power,
