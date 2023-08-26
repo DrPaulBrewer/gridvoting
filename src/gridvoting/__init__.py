@@ -218,7 +218,6 @@ def assert_zero_diagonal_int_matrix(M):
     assert rows == cols
     xp.testing.assert_array_equal(xp.diagonal(M), xp.zeros(shape=(rows), dtype=int))
 
-
 class MarkovChainCPUGPU:
     def __init__(self, *, P, computeNow=True, tolerance=1e-10):
         """initializes a MarkovChainCPUGPU instance by copying in the transition
@@ -364,6 +363,9 @@ class VotingModel:
         self.zi = zi
         self.analyzed = False
 
+    def E_𝝿(self,z):
+        return np.dot(self.stationary_distribution,z)
+
     def analyze(self):
         self.MarkovChain = MarkovChainCPUGPU(P=self._get_transition_matrix())
         self.core_points = xp.asnumpy(self.MarkovChain.absorbing_points)
@@ -389,8 +391,9 @@ class VotingModel:
         points = xp.asnumpy(self.MarkovChain.P[:, index] > 0).astype("int")
         points[index] = 0
         return points
-
-    def summarize_stationary_distribution(self,*,grid,valid=None):
+        
+    def summarize_in_context(self,*,grid,valid=None):
+        """calculate summary statistics for stationary distribution using grid's coordinates and optional subset valid"""
         # missing valid defaults to all True array for grid
         valid = np.fill(True, shape=(grid.len,)) if valid is None else valid
         # check valid array shape 
@@ -400,26 +403,34 @@ class VotingModel:
         # get X and Y coordinates for valid grid points
         validX = grid.x[valid]
         validY = grid.y[valid]
-        x_mean = np.dot(validX,self.stationary_distribution)
-        x_var  = np.dot(vm.stationary_distribution,np.power(triangleX-x_mean, 2))
+        validXY_vectors = grid.as_xy_vectors()[valid]
+        x_mean = self.E_𝝿(validX)
+        x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
         x_sd   = math.sqrt(x_var)
-        y_mean = np.dot(validY,self.stationary_distribution)
-        y_var  = np.dot(vm.stationary_distribution,np.power(triangleY-y_mean, 2))
+        y_mean = self.E_𝝿(validY)
+        y_var  = self.E_𝝿(np.power(validY-y_mean, 2))
         y_sd   = math.sqrt(y_var)
         prob_min = self.stationary_distribution.min()
-        _at_prob_min = np.abs(prob_min-vm.stationary_distribution)<1e-10
-        prob_min_count = _at_prob_min.sum()
-        prob_min_x = validX[_at_prob_min][0]
-        prob_min_y = validY[_at_prob_min][0]
+        at_prob_min = np.abs(prob_min-vm.stationary_distribution)<1e-10
+        prob_min_points = validXY_vectors[at_prob_min,:]
         prob_max = self.stationary_distribution.max()
-        _at_prob_max = np.abs(out['prob_max']-vm.stationary_distribution)<1e-10
-        prob_max_count = _at_prob_max.sum()
-        prob_max_x = validX[_at_prob_max][0]
-        prob_max_y = validY[_at_prob_max][0]
+        at_prob_max = np.abs(prob_max-vm.stationary_distribution)<1e-10
+        prob_max_points = validXY_vectors[at_prob_max,:]
         _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
-        
-        
+        return {
+            'x_mean': x_mean,
+            'x_var': x_var,
+            'x_sd': x_sd,
+            'y_mean': y_mean,
+            'y_var': y_var,
+            'y_sd': y_sd,
+            'prob_min': prob_min,
+            'prob_min_points': prob_min_points,
+            'prob_max': prob_max,
+            'prob_max_points': prob_max_points,
+            'entropy_bits': entropy_bits 
+        }
 
     def plots(
         self,
