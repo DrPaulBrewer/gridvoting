@@ -406,10 +406,10 @@ class VotingModel:
         validXY_vectors = grid.as_xy_vectors()[valid]
         x_mean = self.E_𝝿(validX)
         x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
-        x_sd   = math.sqrt(x_var)
+        x_sd   = np.sqrt(x_var)
         y_mean = self.E_𝝿(validY)
         y_var  = self.E_𝝿(np.power(validY-y_mean, 2))
-        y_sd   = math.sqrt(y_var)
+        y_sd   = np.sqrt(y_var)
         prob_min = self.stationary_distribution.min()
         at_prob_min = np.abs(prob_min-vm.stationary_distribution)<1e-10
         prob_min_points = validXY_vectors[at_prob_min,:]
