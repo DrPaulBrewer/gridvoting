@@ -395,7 +395,7 @@ class VotingModel:
     def summarize_in_context(self,*,grid,valid=None):
         """calculate summary statistics for stationary distribution using grid's coordinates and optional subset valid"""
         # missing valid defaults to all True array for grid
-        valid = np.fill(True, shape=(grid.len,)) if valid is None else valid
+        valid = np.full((grid.len,), True) if valid is None else valid
         # check valid array shape 
         assert valid.shape == (grid.len,)
         # check that the number of valid points matches the dimensionality of the stationary distribution
