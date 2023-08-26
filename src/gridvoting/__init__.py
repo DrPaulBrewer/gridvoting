@@ -331,7 +331,7 @@ class MarkovChainCPUGPU:
         }
         # the following can crash (memory). Explicitly request with danger=True
         if danger:
-            metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] = 
+            metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] = \
                 self.L1_norm_comparing_stationary_distributions(
                     other=self.solve_for_unit_eigenvector()
                 )
