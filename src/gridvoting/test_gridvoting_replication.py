@@ -51,7 +51,7 @@ def test_replicate_spatial_voting_analysis(params, correct):
     assert p_voter_ideal_point_triangle == pytest.approx(correct['p_voter_ideal_point_triangle'], rel=0.05)
     diagnostic_metrics = vm.MarkovChain.diagnostic_metrics(danger=True)
     assert diagnostic_metrics['||F||'] == number_of_alternatives
-    assert diagnostic_metrics['(𝝨𝝿)-1'] == pytest.approx(0.0,abs=1e-0)
+    assert diagnostic_metrics['(𝝨𝝿)-1'] == pytest.approx(0.0,abs=1e-9)
     assert diagnostic_metrics['||𝝿P-𝝿||_L1_norm'] < 1e-9
     assert diagnostic_metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] < 1e-9
     summary = vm.summarize_in_context(grid=grid)
