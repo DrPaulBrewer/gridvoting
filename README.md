@@ -193,8 +193,9 @@ Instance Properties:
   - grid.y1
   - grid.ystep
 * calculated properties
-  - grid.x -- 1D numpy array containing the x-coordinate of each grid point in typewriter order
-  - grid.y -- 1D numpy array containing the y-coordinate of each grid point in typewriter order
+  - grid.points -- 2D numpy array containing a list of grid points in typewriter order `[[x0,y1],[x0+1,y1],...,[x1,y0]]` 
+  - grid.x -- 1D numpy array containing the x-coordinate of each grid point in typewriter order `[x0,...,x0+1,...,x1]`
+  - grid.y -- 1D numpy array containing the y-coordinate of each grid point in [y1,...,y1-1,...,y0] typewriter order
   - grid.gshape -- natural shape (number_of_rows,number_of_cols) where rows represent y-axis and cols represent x-axis
   - grid.extent -- equal to the tuple (x0,x1,y0,y1) for use with matplotlib.pyplot.plt
   - grid.len -- equal to the number of points on the grid
@@ -204,21 +205,9 @@ Instance Properties:
 
 `grid.as_xy_vectors()`
 
-Returns a 2-D array of coordinates for each grid point in typewriter order
+returns a list of coordiantes `[...,[x,y],...]` for each points on the grid, in typewriter order.
 
-Example:
-
-```
-import gridvoting
-grid = gridVoting.Grid(x0=-5,x1=5,y0=-7,y1=7)
-vectors = grid.as_xy_vectors()
-print(vectors.shape)
-print(vectors)
-```
-
-`vectors.shape` will be `(165,2)`
-and vectors will be an array of 165 2D coordinates 
-`[[-5,7],[-4,7],[-3,7],...,[5,7],[-5,6],...,[5,6],...,[5,-7]]`
+**removed in version 0.60.0, use `grid.points` instead**
 
 ----
 `grid.embedding(valid, fill=0.0)`
@@ -268,7 +257,7 @@ print(sum(triangle)) # 15 - the triangle has 15 points on the grid
 # [triangle] can now be used as an index to restrict arrays of 165 entries
 # down to arrays defined on the triangle with 15 entries
 # we can use this to print the (x,y) coordinates for the triangle points
-print(grid.as_xy_vectors()[triangle])
+print(grid.points[triangle])
 [[0 4]
  [0 3]
  [1 3]
@@ -320,7 +309,7 @@ idx = grid.index(x=-4,y=6)
 print(idx)
 ```
 
-`idx` will be 12, because `[-4,6]` is entry [12] of `grid.as_xy_vectors()`
+`idx` will be 12, because `[-4,6]` is entry [12] of `grid.points`
 
 ----
 `grid.plot(title=None, cmap=cm.gray_r, alpha=0.6, alpha_points=0.3, log=True, points=None, zoom=False, border=1, logbias=1e-100, figsize=(10, 10), dpi=72, fname=None)`
