@@ -24,11 +24,11 @@ def test_replicate_spatial_voting_analysis(params, correct):
     number_of_alternatives = (2*g+1)*(2*g+1)
     assert len(grid.x) == number_of_alternatives
     assert len(grid.y) == number_of_alternatives
-    voter_ideal_points = np.array([
+    voter_ideal_points = [
         [-15,-9],
         [0,17],
         [15,-9]
-    ])
+    ]
     number_of_voters = 3
     assert voter_ideal_points.shape == (3,2)
     u = grid.spatial_utilities(
@@ -78,7 +78,7 @@ def test_replicate_core_Plott_theorem_example(params,correct):
     zi = params['zi']
     grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
     u = grid.spatial_utilities(
-        voter_ideal_points=np.array(params['voters']),
+        voter_ideal_points=params['voters'],
         metric='sqeuclidean'
     )
     vm = gv.VotingModel(
