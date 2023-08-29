@@ -400,13 +400,7 @@ class VotingModel:
         validY = grid.y[valid]
         valid_points = grid.points[valid]
         point_mean = self.E_𝝿(valid_points) 
-        cov = self.E_𝝿(np.outer(valid_points-point_mean,valid_points-point_mean))
-        x_mean = self.E_𝝿(validX)
-        x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
-        x_sd   = np.sqrt(x_var)
-        y_mean = self.E_𝝿(validY)
-        y_var  = self.E_𝝿(np.power(validY-y_mean, 2))
-        y_sd   = np.sqrt(y_var)
+        cov = np.cov(valid_points,ddof=0,aweights=vm.stationary_distribution)
         prob_min = self.stationary_distribution.min()
         at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
         prob_min_points = valid_points[at_prob_min,:]
@@ -417,8 +411,7 @@ class VotingModel:
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
         return {
             'point_mean': point_mean,
-            'point_sd': [x_sd,y_sd],
-            'cov': cov,
+            'point_cov': cov,
             'prob_min': prob_min,
             'prob_min_points': prob_min_points,
             'prob_max': prob_max,
