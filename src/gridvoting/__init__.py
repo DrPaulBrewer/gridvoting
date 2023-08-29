@@ -43,7 +43,7 @@ class Grid:
         self.len = self.gshape[0] * self.gshape[1]
         assert self.x.shape == (self.len,)
         assert self.y.shape == (self.len,)
-        assert self.points == (self.len,2)
+        assert self.points.shape == (self.len,2)
 
     def shape(self, *, x0=None, x1=None, xstep=None, y0=None, y1=None, ystep=None):
         """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset"""
