@@ -63,3 +63,43 @@ def test_replicate_spatial_voting_analysis(params, correct):
         decimal=3
     )
     np.testing.assert_array_equal(summary['prob_max_points'],[[0,-1]])
+
+
+@pytest.mark.parametrize("params,correct",[
+    ({'g':20,'zi':False,'start': [0,0], 'next': [1,0]}, {'core_points':[2,0]}),
+    ({'g':20,'zi':True, 'start': [0,0], 'next': [0,1]), {'core_points':[0,2]}),
+    ({'g':20,'zi':False,'start': [-2,2],'next': [1,1]), {'core_points':[0,0]})
+])
+def test_replicate_core_Plott_theorem_example(params,correct):
+    import gridvoting as gv
+    np = gv.np
+    g = params['g']
+    zi = params['zi']
+    start = params['start']
+    next = params['next']
+    grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
+    number_of_alternatives = grid.len
+    number_of_voters = 5
+    # construct voter_ideal_points along a line using vectors start and next
+    voter_ideal_points = np.array([
+        start,
+        start+next,
+        start+2*next, 
+        start+3*next,
+        start+4*next
+    ])
+    u = grid.spartial_utilities(
+        voter_ideal_points=voter_ideal_points,
+        metric='sqeuclidean'
+    )
+    vm = gv.VotingModel(
+        utility_functions=u,
+        majority=3,
+        number_of_voters=number_of_voters,
+        number_of_feasible_alternatives=number_of_feasible_alternatives
+    )
+    vm.analyze()
+    summary - vm.summarize_in_context(grid=grid)
+    np.testing.assert_array_equal(summary['core_points'],np.array(correct['core_points']))
+
+        
