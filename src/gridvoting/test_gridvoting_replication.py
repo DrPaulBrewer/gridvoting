@@ -77,8 +77,6 @@ def test_replicate_core_Plott_theorem_example(params,correct):
     g = params['g']
     zi = params['zi']
     grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
-    number_of_alternatives = grid.len
-    number_of_voters = 5
     u = grid.spatial_utilities(
         voter_ideal_points=np.array(params['voters']),
         metric='sqeuclidean'
@@ -86,8 +84,8 @@ def test_replicate_core_Plott_theorem_example(params,correct):
     vm = gv.VotingModel(
         utility_functions=u,
         majority=3,
-        number_of_voters=number_of_voters,
-        number_of_feasible_alternatives=number_of_feasible_alternatives
+        number_of_voters=5,
+        number_of_feasible_alternatives=grid.len
     )
     vm.analyze()
     summary - vm.summarize_in_context(grid=grid)
