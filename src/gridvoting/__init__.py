@@ -400,7 +400,7 @@ class VotingModel:
         validY = grid.y[valid]
         valid_points = grid.points[valid]
         point_mean = self.E_𝝿(valid_points) 
-        cov = np.cov(valid_points,rowvar=True,ddof=0,aweights=self.stationary_distribution)
+        cov = np.cov(valid_points,rowvar=False,ddof=0,aweights=self.stationary_distribution)
         prob_min = self.stationary_distribution.min()
         at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
         prob_min_points = valid_points[at_prob_min,:]
