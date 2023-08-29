@@ -69,7 +69,7 @@ def test_replicate_spatial_voting_analysis(params, correct):
     ({'g':20,'zi':False,'voters':[[0,0],[1,0],[2,0],[3,0],[4,0]]}, {'core_points':[2,0]}), 
     ({'g':20,'zi':True, 'voters':[[0,0],[0,1],[0,2],[0,3],[0,4]]}, {'core_points':[0,2]}),
     ({'g':20,'zi':False,'voters':[[-2,-2],[-1,-1],[0,0],[1,1],[2,2]]}, {'core_points':[0,0]}),
-    {{'g':20,'zi':True,'voters':[[-10,-10],[-10,10],[10,-10],[10,10],[0,0]}, {'core_points':[0,0]})
+    {{'g':20,'zi':True,'voters':[[-10,-10],[-10,10],[10,-10],[10,10],[0,0]]}, {'core_points':[0,0]})
 ])
 def test_replicate_core_Plott_theorem_example(params,correct):
     import gridvoting as gv
