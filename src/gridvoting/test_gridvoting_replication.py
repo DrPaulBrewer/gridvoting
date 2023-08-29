@@ -30,7 +30,6 @@ def test_replicate_spatial_voting_analysis(params, correct):
         [15,-9]
     ]
     number_of_voters = 3
-    assert voter_ideal_points.shape == (3,2)
     u = grid.spatial_utilities(
         voter_ideal_points=voter_ideal_points,
         metric='sqeuclidean'
