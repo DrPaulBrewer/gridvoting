@@ -399,6 +399,12 @@ class VotingModel:
         validX = grid.x[valid]
         validY = grid.y[valid]
         valid_points = grid.points[valid]
+        if self.core_exists:
+            return {
+                'core_exists': self.core_exists,
+                'core_points': valid_points[self.core_points]
+            }
+        # else core does not exist, so evaulate mean, cov, min, max of stationary distribution
         point_mean = self.E_𝝿(valid_points) 
         cov = np.cov(valid_points,rowvar=False,ddof=0,aweights=self.stationary_distribution)
         prob_min = self.stationary_distribution.min()
@@ -410,6 +416,7 @@ class VotingModel:
         _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
         return {
+            'core_exists': self.core_exists,
             'point_mean': point_mean,
             'point_cov': cov,
             'prob_min': prob_min,
