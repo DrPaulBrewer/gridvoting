@@ -393,8 +393,6 @@ class VotingModel:
         valid = np.full((grid.len,), True) if valid is None else valid
         # check valid array shape 
         assert valid.shape == (grid.len,)
-        # check that the number of valid points matches the dimensionality of the stationary distribution
-        assert (valid.sum(),) == self.stationary_distribution.shape
         # get X and Y coordinates for valid grid points
         validX = grid.x[valid]
         validY = grid.y[valid]
@@ -404,7 +402,9 @@ class VotingModel:
                 'core_exists': self.core_exists,
                 'core_points': valid_points[self.core_points]
             }
-        # else core does not exist, so evaulate mean, cov, min, max of stationary distribution
+        # core does not exist, so evaulate mean, cov, min, max of stationary distribution
+        # first check that the number of valid points matches the dimensionality of the stationary distribution
+        assert (valid.sum(),) == self.stationary_distribution.shape
         point_mean = self.E_𝝿(valid_points) 
         cov = np.cov(valid_points,rowvar=False,ddof=0,aweights=self.stationary_distribution)
         prob_min = self.stationary_distribution.min()
