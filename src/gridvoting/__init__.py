@@ -83,6 +83,7 @@ class Grid:
     
     def within_triangle(self,*,points):
         """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined triangle"""
+        points = np.asarray(points)
         assert points.shape == (3,2)
         barycentric_to_cartesian_matrix = np.row_stack((points[:,0],points[:,1],np.ones(points.shape[0])))
         assert barycentric_to_cartesian_matrix.shape == (3,3)
@@ -140,7 +141,7 @@ class Grid:
     ):
         """returns utility function values for each voter at each grid point"""
         return scale * cdist(
-            voter_ideal_points, self.points, metric=metric, **kwargs
+            np.asarray(voter_ideal_points), self.points, metric=metric, **kwargs
         )
 
     def plot(
@@ -358,6 +359,7 @@ class VotingModel:
         self.analyzed = False
 
     def E_𝝿(self,z):
+        """returns mean, i.e., expected value of z under the stationary distribution"""
         return np.dot(self.stationary_distribution,z)
 
     def analyze(self):
@@ -392,33 +394,32 @@ class VotingModel:
         valid = np.full((grid.len,), True) if valid is None else valid
         # check valid array shape 
         assert valid.shape == (grid.len,)
-        # check that the number of valid points matches the dimensionality of the stationary distribution
-        assert (valid.sum(),) == self.stationary_distribution.shape
         # get X and Y coordinates for valid grid points
         validX = grid.x[valid]
         validY = grid.y[valid]
-        validXY_vectors = grid.points[valid]
-        x_mean = self.E_𝝿(validX)
-        x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
-        x_sd   = np.sqrt(x_var)
-        y_mean = self.E_𝝿(validY)
-        y_var  = self.E_𝝿(np.power(validY-y_mean, 2))
-        y_sd   = np.sqrt(y_var)
+        valid_points = grid.points[valid]
+        if self.core_exists:
+            return {
+                'core_exists': self.core_exists,
+                'core_points': valid_points[self.core_points]
+            }
+        # core does not exist, so evaulate mean, cov, min, max of stationary distribution
+        # first check that the number of valid points matches the dimensionality of the stationary distribution
+        assert (valid.sum(),) == self.stationary_distribution.shape
+        point_mean = self.E_𝝿(valid_points) 
+        cov = np.cov(valid_points,rowvar=False,ddof=0,aweights=self.stationary_distribution)
         prob_min = self.stationary_distribution.min()
         at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
-        prob_min_points = validXY_vectors[at_prob_min,:]
+        prob_min_points = valid_points[at_prob_min,:]
         prob_max = self.stationary_distribution.max()
         at_prob_max = np.abs(prob_max-self.stationary_distribution)<1e-10
-        prob_max_points = validXY_vectors[at_prob_max,:]
+        prob_max_points = valid_points[at_prob_max,:]
         _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
         return {
-            'x_mean': x_mean,
-            'x_var': x_var,
-            'x_sd': x_sd,
-            'y_mean': y_mean,
-            'y_var': y_var,
-            'y_sd': y_sd,
+            'core_exists': self.core_exists,
+            'point_mean': point_mean,
+            'point_cov': cov,
             'prob_min': prob_min,
             'prob_min_points': prob_min_points,
             'prob_max': prob_max,

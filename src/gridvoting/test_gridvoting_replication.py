@@ -8,10 +8,10 @@ import pytest
 # grid size 40 is commented out because of low RAM on github actions but can be tested manually by removing '#'
 
 @pytest.mark.parametrize("params,correct", [
-    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'p_voter_ideal_point_triangle': 0.458, 'entropy': 10.32, 'y_mean': -0.1452}),
-    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'p_voter_ideal_point_triangle': 0.68, 'entropy':  9.68, 'y_mean': -0.2937}),
-#   ({'g':40,'zi':False}, {'p_boundary': 0.000254, 'p_voter_ideal_point_triangle':0.396, 'entropy': 10.92, 'y_mean': -0.3373}),
-#   ({'g':40,'zi':True},  {'p_boundary': 2.55e-05, 'p_voter_ideal_point_triangle':0.675, 'entropy': 9.82, 'y_mean': -0.3428})
+    ({'g':20,'zi':False}, {'p_boundary': 0.024, 'p_voter_ideal_point_triangle': 0.458, 'entropy': 10.32, 'mean': [0,-0.1452]}),
+    ({'g':20,'zi':True},  {'p_boundary': 0.0086,'p_voter_ideal_point_triangle': 0.68, 'entropy':  9.68, 'mean': [0,-0.2937]}),
+#   ({'g':40,'zi':False}, {'p_boundary': 0.000254, 'p_voter_ideal_point_triangle':0.396, 'entropy': 10.92, 'mean': [0,-0.3373]}),
+#   ({'g':40,'zi':True},  {'p_boundary': 2.55e-05, 'p_voter_ideal_point_triangle':0.675, 'entropy': 9.82, 'mean': [0,-0.3428]})
 ])
 def test_replicate_spatial_voting_analysis(params, correct):
     import gridvoting as gv
@@ -24,13 +24,12 @@ def test_replicate_spatial_voting_analysis(params, correct):
     number_of_alternatives = (2*g+1)*(2*g+1)
     assert len(grid.x) == number_of_alternatives
     assert len(grid.y) == number_of_alternatives
-    voter_ideal_points = np.array([
+    voter_ideal_points = [
         [-15,-9],
         [0,17],
         [15,-9]
-    ])
+    ]
     number_of_voters = 3
-    assert voter_ideal_points.shape == (3,2)
     u = grid.spatial_utilities(
         voter_ideal_points=voter_ideal_points,
         metric='sqeuclidean'
@@ -57,6 +56,39 @@ def test_replicate_spatial_voting_analysis(params, correct):
     assert diagnostic_metrics['||𝝿_power-𝝿_algebraic||_L1_norm'] < 1e-9
     summary = vm.summarize_in_context(grid=grid)
     assert summary['entropy_bits'] == pytest.approx(correct['entropy'],abs=0.01)
-    assert summary['x_mean'] == pytest.approx(0.0,abs=0.01)
-    assert summary['y_mean'] == pytest.approx(correct['y_mean'], abs=0.001)
+    np.testing.assert_array_almost_equal(
+        summary['point_mean'],
+        np.array(correct['mean']),
+        decimal=3
+    )
     np.testing.assert_array_equal(summary['prob_max_points'],[[0,-1]])
+
+
+@pytest.mark.parametrize("params,correct",[
+    ({'g':20,'zi':False,'voters':[[0,0],[1,0],[2,0],[3,0],[4,0]]}, {'core_points':[[2,0]]}), 
+    ({'g':20,'zi':True, 'voters':[[0,0],[0,1],[0,2],[0,3],[0,4]]}, {'core_points':[[0,2]]}),
+    ({'g':20,'zi':False,'voters':[[-2,-2],[-1,-1],[0,0],[1,1],[2,2]]}, {'core_points':[[0,0]]}),
+    ({'g':20,'zi':True,'voters':[[-10,-10],[-10,10],[10,-10],[10,10],[0,0]]}, {'core_points':[[0,0]]})
+])
+def test_replicate_core_Plott_theorem_example(params,correct):
+    import gridvoting as gv
+    np = gv.np
+    g = params['g']
+    zi = params['zi']
+    grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
+    u = grid.spatial_utilities(
+        voter_ideal_points=params['voters'],
+        metric='sqeuclidean'
+    )
+    vm = gv.VotingModel(
+        utility_functions=u,
+        majority=3,
+        number_of_voters=5,
+        number_of_feasible_alternatives=grid.len,
+        zi=zi
+    )
+    vm.analyze()
+    summary = vm.summarize_in_context(grid=grid)
+    np.testing.assert_array_equal(summary['core_points'],np.array(correct['core_points']))
+
+        
