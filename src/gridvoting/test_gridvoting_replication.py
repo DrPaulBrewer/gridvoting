@@ -67,8 +67,8 @@ def test_replicate_spatial_voting_analysis(params, correct):
 
 @pytest.mark.parametrize("params,correct",[
     ({'g':20,'zi':False,'start': [0,0], 'next': [1,0]}, {'core_points':[2,0]}),
-    ({'g':20,'zi':True, 'start': [0,0], 'next': [0,1]), {'core_points':[0,2]}),
-    ({'g':20,'zi':False,'start': [-2,2],'next': [1,1]), {'core_points':[0,0]})
+    ({'g':20,'zi':True, 'start': [0,0], 'next': [0,1]}, {'core_points':[0,2]}),
+    ({'g':20,'zi':False,'start': [-2,2],'next': [1,1]}, {'core_points':[0,0]})
 ])
 def test_replicate_core_Plott_theorem_example(params,correct):
     import gridvoting as gv
