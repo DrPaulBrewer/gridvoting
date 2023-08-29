@@ -35,7 +35,8 @@ class Grid:
         xgrid, ygrid = np.meshgrid(xvals, yvals)
         self.x = np.ravel(xgrid)
         self.y = np.ravel(ygrid)
-        # should match extent=(x0,x1,y0,y1) for compatibility with matplotlib.pyplot.contour
+        self.points = np.column_stack((self.x,self.y))
+        # extent should match extent=(x0,x1,y0,y1) for compatibility with matplotlib.pyplot.contour
         # see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html
         self.extent = (self.x0, self.x1, self.y0, self.y1)
         self.gshape = self.shape()
@@ -43,13 +44,7 @@ class Grid:
         self.len = self.gshape[0] * self.gshape[1]
         assert self.x.shape == (self.len,)
         assert self.y.shape == (self.len,)
-
-
-    def as_xy_vectors(self):
-        """returns [x,y] vectors for all grid points"""
-        vectors = np.column_stack((self.x, self.y))
-        assert vectors.shape == (self.len, 2)
-        return vectors
+        assert self.points == (self.len,2)
 
     def shape(self, *, x0=None, x1=None, xstep=None, y0=None, y1=None, ystep=None):
         """returns a tuple(number_of_rows,number_of_cols) for the natural shape of the current grid, or a subset"""
@@ -82,7 +77,7 @@ class Grid:
     def within_disk(self, *, x0, y0, r, metric="euclidean", **kwargs):
         """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined disk"""
         mask = (
-            cdist([[x0, y0]], self.as_xy_vectors(), metric=metric, **kwargs) <= r
+            cdist([[x0, y0]], self.points, metric=metric, **kwargs) <= r
         ).flatten()
         assert mask.shape == (self.len,)
         return mask
@@ -146,7 +141,7 @@ class Grid:
     ):
         """returns utility function values for each voter at each grid point"""
         return scale * cdist(
-            voter_ideal_points, self.as_xy_vectors(), metric=metric, **kwargs
+            voter_ideal_points, self.points, metric=metric, **kwargs
         )
 
     def plot(
@@ -403,7 +398,7 @@ class VotingModel:
         # get X and Y coordinates for valid grid points
         validX = grid.x[valid]
         validY = grid.y[valid]
-        validXY_vectors = grid.as_xy_vectors()[valid]
+        validXY_vectors = grid.points[valid]
         x_mean = self.E_𝝿(validX)
         x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
         x_sd   = np.sqrt(x_var)
