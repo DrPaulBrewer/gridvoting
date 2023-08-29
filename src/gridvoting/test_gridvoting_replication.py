@@ -89,7 +89,7 @@ def test_replicate_core_Plott_theorem_example(params,correct):
         zi=zi
     )
     vm.analyze()
-    summary - vm.summarize_in_context(grid=grid)
+    summary = vm.summarize_in_context(grid=grid)
     np.testing.assert_array_equal(summary['core_points'],np.array(correct['core_points']))
 
         
