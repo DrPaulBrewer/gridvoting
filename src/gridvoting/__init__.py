@@ -140,7 +140,7 @@ class Grid:
     ):
         """returns utility function values for each voter at each grid point"""
         return scale * cdist(
-            voter_ideal_points, self.points, metric=metric, **kwargs
+            np.asarray(voter_ideal_points), self.points, metric=metric, **kwargs
         )
 
     def plot(
