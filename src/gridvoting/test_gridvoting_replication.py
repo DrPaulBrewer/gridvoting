@@ -80,7 +80,7 @@ def test_replicate_core_Plott_theorem_example(params,correct):
     number_of_alternatives = grid.len
     number_of_voters = 5
     u = grid.spatial_utilities(
-        voter_ideal_points=numpy.array(params['voters']),
+        voter_ideal_points=np.array(params['voters']),
         metric='sqeuclidean'
     )
     vm = gv.VotingModel(
