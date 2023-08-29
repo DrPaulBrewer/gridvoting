@@ -159,7 +159,7 @@ def test_grid_as_xy_vectors():
        [ 3, -5]
     ])
     np.testing.assert_array_equal(
-        grid.as_xy_vectors(),
+        grid.points,
         correct_vectors
     )
 
@@ -198,7 +198,7 @@ def test_grid_embedding():
     ])
     np.testing.assert_array_equal(triangle.reshape(grid.gshape),correct_triangle)
     assert 15 == triangle.sum()
-    triangle_points_xy = grid.as_xy_vectors()[triangle]
+    triangle_points_xy = grid.points[triangle]
     correct_triangle_points_xy = np.array([
         [0,4],
         [0,3],
@@ -297,7 +297,7 @@ def test_grid_within_triangle_many_right_triangles():
                     calc_triangle_B = grid.within_triangle(points=altpoints)
                     unusual = (calc_triangle_A != correct_triangle) | (calc_triangle_B != correct_triangle)
                     if unusual.sum()>0:
-                        disagree = grid.as_xy_vectors()[unusual][0,:]
+                        disagree = grid.points[unusual][0,:]
                         raise Exception("input={points},disagreement={disagree}".format(points=points,disagree=disagree))
                     
 def test_grid_spatial_utility():
