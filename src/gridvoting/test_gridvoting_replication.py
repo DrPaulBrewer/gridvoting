@@ -85,7 +85,8 @@ def test_replicate_core_Plott_theorem_example(params,correct):
         utility_functions=u,
         majority=3,
         number_of_voters=5,
-        number_of_feasible_alternatives=grid.len
+        number_of_feasible_alternatives=grid.len,
+        zi=zi
     )
     vm.analyze()
     summary - vm.summarize_in_context(grid=grid)
