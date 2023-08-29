@@ -83,6 +83,7 @@ class Grid:
     
     def within_triangle(self,*,points):
         """returns 1D numpy boolean array, suitable as an index mask, for testing whether a grid point is also in the defined triangle"""
+        points = np.asarray(points)
         assert points.shape == (3,2)
         barycentric_to_cartesian_matrix = np.row_stack((points[:,0],points[:,1],np.ones(points.shape[0])))
         assert barycentric_to_cartesian_matrix.shape == (3,3)
