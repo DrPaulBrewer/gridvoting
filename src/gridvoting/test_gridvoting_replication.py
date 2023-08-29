@@ -66,17 +66,16 @@ def test_replicate_spatial_voting_analysis(params, correct):
 
 
 @pytest.mark.parametrize("params,correct",[
-    ({'g':20,'zi':False,'voters':[[0,0],[1,0],[2,0],[3,0],[4,0]]}, {'core_points':[2,0]}),
+    ({'g':20,'zi':False,'voters':[[0,0],[1,0],[2,0],[3,0],[4,0]]}, {'core_points':[2,0]}), 
     ({'g':20,'zi':True, 'voters':[[0,0],[0,1],[0,2],[0,3],[0,4]]}, {'core_points':[0,2]}),
-    ({'g':20,'zi':False,'voters':[[-2,-2],[-1,-1],[0,0],[1,1],[2,2]]}, {'core_points':[0,0]})
+    ({'g':20,'zi':False,'voters':[[-2,-2],[-1,-1],[0,0],[1,1],[2,2]]}, {'core_points':[0,0]}),
+    {{'g':20,'zi':True,'voters':[[-10,-10],[-10,10],[10,-10],[10,10],[0,0]}, {'core_points':[0,0]})
 ])
 def test_replicate_core_Plott_theorem_example(params,correct):
     import gridvoting as gv
     np = gv.np
     g = params['g']
     zi = params['zi']
-    start = params['start']
-    next = params['next']
     grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
     number_of_alternatives = grid.len
     number_of_voters = 5
