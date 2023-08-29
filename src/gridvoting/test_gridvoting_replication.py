@@ -66,9 +66,9 @@ def test_replicate_spatial_voting_analysis(params, correct):
 
 
 @pytest.mark.parametrize("params,correct",[
-    ({'g':20,'zi':False,'start': [0,0], 'next': [1,0]}, {'core_points':[2,0]}),
-    ({'g':20,'zi':True, 'start': [0,0], 'next': [0,1]}, {'core_points':[0,2]}),
-    ({'g':20,'zi':False,'start': [-2,2],'next': [1,1]}, {'core_points':[0,0]})
+    ({'g':20,'zi':False,'voters':[[0,0],[1,0],[2,0],[3,0],[4,0]]}, {'core_points':[2,0]}),
+    ({'g':20,'zi':True, 'voters':[[0,0],[0,1],[0,2],[0,3],[0,4]]}, {'core_points':[0,2]}),
+    ({'g':20,'zi':False,'voters':[[-2,-2],[-1,-1],[0,0],[1,1],[2,2]]}, {'core_points':[0,0]})
 ])
 def test_replicate_core_Plott_theorem_example(params,correct):
     import gridvoting as gv
@@ -80,16 +80,8 @@ def test_replicate_core_Plott_theorem_example(params,correct):
     grid = gv.Grid(x0=-g,x1=g,y0=-g,y1=g)
     number_of_alternatives = grid.len
     number_of_voters = 5
-    # construct voter_ideal_points along a line using vectors start and next
-    voter_ideal_points = np.array([
-        start,
-        start+next,
-        start+2*next, 
-        start+3*next,
-        start+4*next
-    ])
     u = grid.spartial_utilities(
-        voter_ideal_points=voter_ideal_points,
+        voter_ideal_points=numpy.array(params['voters']),
         metric='sqeuclidean'
     )
     vm = gv.VotingModel(
