@@ -9,7 +9,6 @@ use_cupy = False
 
 try:
     import cupy as cp
-
     use_cupy = True
     xp = cp
 except ImportError as err:
