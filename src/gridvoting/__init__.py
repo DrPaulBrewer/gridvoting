@@ -358,6 +358,7 @@ class VotingModel:
         self.analyzed = False
 
     def E_𝝿(self,z):
+        """returns mean, i.e., expected value of z under the stationary distribution"""
         return np.dot(self.stationary_distribution,z)
 
     def analyze(self):
@@ -397,7 +398,9 @@ class VotingModel:
         # get X and Y coordinates for valid grid points
         validX = grid.x[valid]
         validY = grid.y[valid]
-        validXY_vectors = grid.points[valid]
+        valid_points = grid.points[valid]
+        point_mean = self.E_𝝿(valid_points) 
+        cov = self.E_𝝿(np.outer(valid_points-point_mean,valid_points-point_mean))
         x_mean = self.E_𝝿(validX)
         x_var  = self.E_𝝿(np.power(validX-x_mean, 2))
         x_sd   = np.sqrt(x_var)
@@ -406,19 +409,16 @@ class VotingModel:
         y_sd   = np.sqrt(y_var)
         prob_min = self.stationary_distribution.min()
         at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
-        prob_min_points = validXY_vectors[at_prob_min,:]
+        prob_min_points = valid_points[at_prob_min,:]
         prob_max = self.stationary_distribution.max()
         at_prob_max = np.abs(prob_max-self.stationary_distribution)<1e-10
-        prob_max_points = validXY_vectors[at_prob_max,:]
+        prob_max_points = valid_points[at_prob_max,:]
         _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
         return {
-            'x_mean': x_mean,
-            'x_var': x_var,
-            'x_sd': x_sd,
-            'y_mean': y_mean,
-            'y_var': y_var,
-            'y_sd': y_sd,
+            'point_mean': point_mean,
+            'point_sd': [x_sd,y_sd],
+            'cov': cov,
             'prob_min': prob_min,
             'prob_min_points': prob_min_points,
             'prob_max': prob_max,
