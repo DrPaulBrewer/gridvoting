@@ -299,10 +299,10 @@ print(emfunc(triangle_x, fill=0.0).reshape(grid.gshape))
 `grid.extremes(z,valid=valid)`
 
 inputs:
-     `z` is a 1D numpy array of length valid.sum()
 
-      `valid` is a 1D numpy array of length grid.len indicating which grid points are valid.
-      If `valid` is omitted, all grid points will be considered valid.
+`z` is a 1D numpy array of length `valid.sum()`
+
+`valid` is a 1D numpy array of length grid.len indicating which grid points are valid. If `valid` is omitted, all grid points will be considered valid.
   
 returns:
 
