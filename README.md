@@ -296,6 +296,23 @@ print(emfunc(triangle_x, fill=0.0).reshape(grid.gshape))
 ```
 
 ----
+`grid.extremes(z,valid=valid)`
+
+inputs:
+     `z` is a 1D numpy array of length valid.sum()
+
+      `valid` is a 1D numpy array of length grid.len indicating which grid points are valid.
+      If `valid` is omitted, all grid points will be considered valid.
+  
+returns:
+
+  `(min_z,min_z_points,max_z,max_z_points)`
+
+  where `min_z` and `max_z` are the minimum and maximum values of z and
+
+  `min_z_points` and `max_z_points` are arrays of `[x,y]` points where the min and max occur in z.
+
+----
 `grid.index(x,y)`
 
 Locates the index in the grid's coordinate array for the point (x,y)
