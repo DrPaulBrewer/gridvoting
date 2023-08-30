@@ -136,6 +136,18 @@ class Grid:
 
         return efunc
 
+    def extremes(self, z, *, valid=None):
+        # missing valid defaults to all True array for grid
+        valid = np.full((self.len,), True) if valid is None else valid
+        assert valid.shape == (self.len,)
+        assert z.shape == (valid.sum(),)
+        min_z = z.min()
+        min_z_mask = np.abs(z-min_z)<1e-10
+        max_z = z.max()
+        max_z_mask = np.abs(z-max_z)<1e-10
+        return (min_z,self.points[valid][min_z_mask],max_z,self.points[valid][max_z_mask])
+        
+    
     def spatial_utilities(
         self, *, voter_ideal_points, metric="sqeuclidean", scale=-1, **kwargs
     ):
@@ -408,12 +420,8 @@ class VotingModel:
         assert (valid.sum(),) == self.stationary_distribution.shape
         point_mean = self.E_𝝿(valid_points) 
         cov = np.cov(valid_points,rowvar=False,ddof=0,aweights=self.stationary_distribution)
-        prob_min = self.stationary_distribution.min()
-        at_prob_min = np.abs(prob_min-self.stationary_distribution)<1e-10
-        prob_min_points = valid_points[at_prob_min,:]
-        prob_max = self.stationary_distribution.max()
-        at_prob_max = np.abs(prob_max-self.stationary_distribution)<1e-10
-        prob_max_points = valid_points[at_prob_max,:]
+        (prob_min,prob_min_points,prob_max,prob_max_points) = \
+            grid.extremes(self.stationary_distribution,valid=valid)
         _nonzero_statd = self.stationary_distribution[self.stationary_distribution>0]
         entropy_bits = -_nonzero_statd.dot(np.log2(_nonzero_statd))
         return {
