@@ -275,7 +275,8 @@ class MarkovChainCPUGPU:
             "sad": [],
             "averaged": None,
             "first_index_at_max_prob": None,
-            "zeroes_on_max_prob_row": None
+            "zeroes_on_max_prob_row": None,
+            "zeroed_check_norm_improvement": None
         }
         while unconverged:
             P_power = xp.linalg.matrix_power(P_power, 2)
@@ -318,6 +319,7 @@ class MarkovChainCPUGPU:
             zeroed_check_norm = self.L1_norm_of_single_step_change(
                 zeroed_stationary_distribution
             )
+            diags["zeroed_check_norm_improvement"] = self.check_norm-zeroed_check_norm
             if (zeroed_check_norm <= self.check_norm):
                 diags["averaged"] = False
                 self.stationary_distribution = zeroed_stationary_distribution
