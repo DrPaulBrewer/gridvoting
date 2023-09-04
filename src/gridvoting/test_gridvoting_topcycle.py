@@ -1,21 +1,23 @@
 import gridvoting as gv
+from itertools import permutations
 def test_gridvoting_topcycle():
   np = gv.np
   xp = gv.xp
-  u = np.array([
-    [1000,900,800,20,10,1],
-    [800,1000,900,1,20,10],
-    [900,800,1000,10,1,20]
-  ])
-  vm = gv.VotingModel(utility_functions=u,number_of_feasible_alternatives=6,number_of_voters=3,majority=2,zi=False)
-  vm.analyze()
-  xp.testing.assert_array_almost_equal(
-    vm.stationary_distribution,
-    [1/3,1/3,1/3,0.,0.,0.],
-    1e-9
-  )
-  xp.testing.assert_array_equal(
-    vm.stationary_distribution[3:],
-    [0.,0.,0.]
-  )
+  for perm in permutations(np.arange(6)):
+    aperm = np.array(perm)
+    u = np.array([
+      [1000,900,800,20,10,1],
+      [800,1000,900,1,20,10],
+      [900,800,1000,10,1,20]
+    ])[:,aperm]
+    correct_stationary_distribution = np.array([1/3,1/3,1/3,0.,0.,0.])[aperm]
+    vm = gv.VotingModel(utility_functions=u,number_of_feasible_alternatives=6,number_of_voters=3,majority=2,zi=False)
+    vm.analyze()
+    xp.testing.assert_array_almost_equal(
+      vm.stationary_distribution,
+      correct_stationary_distribution
+      1e-9
+    )
+    zero_mask = correct_stationary_distibution==0.0
+    assert 0.0 == vm.stationary_distribution[zero_mask].sum()
   
