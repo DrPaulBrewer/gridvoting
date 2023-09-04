@@ -313,7 +313,17 @@ class MarkovChainCPUGPU:
                     self.stationary_distribution
                 )
                 unconverged = self.check_norm > tolerance
-
+        zrow = row1 if ((row1==0.0).sum())>((row2==0.0).sum()) else row2
+        elements_to_zero = (zrow==0.0) & (self.stationary_distribution < tolerance)
+        if (xp.any(elements_to_zero)):
+            zeroed_stationary_distribution = xp.copy(self.stationary_distribution)
+            zeroed_stationary_distribution[elements_to_zero]=0.0
+            zeroed_check_norm = self.L1_norm_of_single_step_change(
+                zeroed_stationary_distribution
+            )
+            if (zeroed_check_norm <= self.check_norm):
+                self.stationary_distribution = zeroed_stationary_distribution
+                self.check_norm = zeroed_check_norm
         self.power = power
         self.power_method_diagnostics = diags
         del cP_LT
