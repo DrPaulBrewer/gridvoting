@@ -19,5 +19,5 @@ def test_gridvoting_topcycle():
       1e-9
     )
     zero_mask = correct_stationary_distribution==0.0
-    assert 0.0 == vm.stationary_distribution[zero_mask].sum()
-  
+    if vm.stationary_distribution[zero_mask].sum()>0.0:
+      raise RuntimeError("lower cycle still positive: "+str(vm.MarkovChain.power_method_diagnostics))
