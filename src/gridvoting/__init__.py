@@ -267,8 +267,7 @@ class MarkovChainCPUGPU:
             return None
         unconverged = True
         power = start_power
-        cP = self.P
-        cP_LT = xp.linalg.matrix_power(cP, start_power)
+        P_power = xp.linalg.matrix_power(self.P, start_power)
         diags = {
             "power": [],
             "sum_min_minus_1": [],
@@ -277,10 +276,10 @@ class MarkovChainCPUGPU:
             "averaged": None
         }
         while unconverged:
-            cP_LT = xp.linalg.matrix_power(cP_LT, 2)
+            P_power = xp.linalg.matrix_power(P_power, 2)
             power = power * 2
-            p_min = cP_LT.min(axis=0)
-            p_max = cP_LT.max(axis=0)
+            p_min = P_power.min(axis=0)
+            p_max = P_power.max(axis=0)
             # cast to float is required because cp.sum yields a cp.cparray
             # with zero dimensions instead of a scalar
             #
@@ -296,8 +295,8 @@ class MarkovChainCPUGPU:
             unconverged = sum_absolute_diff > tolerance
             if not unconverged:
                 # these extra steps are taken when there is a possible solution
-                # use an average over all the rows to collapse cp_LT
-                self.stationary_distribution = xp.average(cP_LT, axis=0)
+                # use an average over all the rows to collapse P_power
+                self.stationary_distribution = xp.average(P_power, axis=0)
                 diags["averaged"] = True
                 # double check the solution via an L1 norm
                 self.check_norm = self.L1_norm_of_single_step_change(
@@ -307,10 +306,11 @@ class MarkovChainCPUGPU:
         # if we have a candidate, check the element that has the maximum probability
         # and see if the corresponding row of P^power has zeroes.  These are unreached alternatives
         # then check to see which distribution has a better L1 norm of single step change
-        max_element = self.stationary_distribution==(self.stationary_distribution.max())
-        elements_to_zero = (cP_LT[max_element,:][0,:]==0.) & (self.stationary_distribution < tolerance)
+        first_index_at_max_prob = xp.argmax(self.stationary_distribution)
+        mle_row = xp.copy(P_power[first_index_at_max_prob,:])
+        elements_to_zero = (mle_row==0.) & (self.stationary_distribution < tolerance)
         if (xp.any(elements_to_zero)):
-            zeroed_stationary_distribution = xp.copy(cp_LT[max_element,:])
+            zeroed_stationary_distribution = mle_row
             zeroed_check_norm = self.L1_norm_of_single_step_change(
                 zeroed_stationary_distribution
             )
@@ -320,7 +320,7 @@ class MarkovChainCPUGPU:
                 self.check_norm = zeroed_check_norm
         self.power = power
         self.power_method_diagnostics = diags
-        del cP_LT
+        del P_power
         return self.stationary_distribution
 
     def L1_norm_comparing_stationary_distributions(self,*,other):
