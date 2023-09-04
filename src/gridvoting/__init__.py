@@ -271,9 +271,10 @@ class MarkovChainCPUGPU:
         cP_LT = xp.linalg.matrix_power(cP, start_power)
         diags = {
             "power": [],
-            "sum_min": [],
-            "sum_max": [],
-            "sad": []
+            "sum_min_minus_1": [],
+            "sum_max_minus_1": [],
+            "sad": [],
+            "averaged": None
         }
         while unconverged:
             cP_LT = xp.linalg.matrix_power(cP_LT, 2)
@@ -290,27 +291,31 @@ class MarkovChainCPUGPU:
             sum_max = float(p_max.sum())
             diags["sad"].append(sum_absolute_diff)
             diags["power"].append(power)
-            diags["sum_max"].append(sum_max)
-            diags["sum_min"].append(sum_min)
+            diags["sum_max_minus_1"].append(sum_max-1.0)
+            diags["sum_min_minus_1"].append(sum_min-1.0)
             unconverged = sum_absolute_diff > tolerance
             if not unconverged:
                 # these extra steps are taken when there is a possible solution
                 # use an average over all the rows to collapse cp_LT
                 self.stationary_distribution = xp.average(cP_LT, axis=0)
+                diags["averaged"] = True
                 # double check the solution via an L1 norm
                 self.check_norm = self.L1_norm_of_single_step_change(
                     self.stationary_distribution
                 )
                 unconverged = self.check_norm > tolerance
+        # if we have a candidate, check the element that has the maximum probability
+        # and see if the corresponding row of P^power has zeroes.  These are unreached alternatives
+        # then check to see which distribution has a better L1 norm of single step change
         max_element = self.stationary_distribution==(self.stationary_distribution.max())
         elements_to_zero = (cP_LT[max_element,:][0,:]==0.) & (self.stationary_distribution < tolerance)
         if (xp.any(elements_to_zero)):
-            zeroed_stationary_distribution = xp.copy(self.stationary_distribution)
-            zeroed_stationary_distribution[elements_to_zero]=0.0
+            zeroed_stationary_distribution = xp.copy(cp_LT[max_element,:])
             zeroed_check_norm = self.L1_norm_of_single_step_change(
                 zeroed_stationary_distribution
             )
             if (zeroed_check_norm <= self.check_norm):
+                diags["averaged"] = False
                 self.stationary_distribution = zeroed_stationary_distribution
                 self.check_norm = zeroed_check_norm
         self.power = power
