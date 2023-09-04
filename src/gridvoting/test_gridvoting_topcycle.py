@@ -15,9 +15,9 @@ def test_gridvoting_topcycle():
     vm.analyze()
     xp.testing.assert_array_almost_equal(
       vm.stationary_distribution,
-      correct_stationary_distribution
+      correct_stationary_distribution,
       1e-9
     )
-    zero_mask = correct_stationary_distibution==0.0
+    zero_mask = correct_stationary_distribution==0.0
     assert 0.0 == vm.stationary_distribution[zero_mask].sum()
   
