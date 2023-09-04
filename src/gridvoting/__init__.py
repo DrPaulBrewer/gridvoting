@@ -266,43 +266,32 @@ class MarkovChainCPUGPU:
             self.stationary_distribution = None
             return None
         unconverged = True
-        check1 = 0  # upper left when P is from a grid
-        check2 = int(self.P.shape[0] / 2)  # center when P is from a grid
         power = start_power
         cP = self.P
         cP_LT = xp.linalg.matrix_power(cP, start_power)
         diags = {
             "power": [],
-            "sum1minus1": [],
-            "sum2minus1": [],
-            "sad": [],
-            "diff1": [],
-            "diff2": [],
+            "sum_min": [],
+            "sum_max": [],
+            "sad": []
         }
         while unconverged:
             cP_LT = xp.linalg.matrix_power(cP_LT, 2)
             power = power * 2
-            row1 = cP_LT[check1]
-            row2 = cP_LT[check2]
+            p_min = cP_LT.min(axis=0)
+            p_max = cP_LT.max(axis=0)
             # cast to float is required because cp.sum yields a cp.cparray
             # with zero dimensions instead of a scalar
             #
-            # sum_..._ces = L1 norm of two different rows of P^power
-            sum_absolute_diff = float(xp.linalg.norm(row1 - row2, ord=1))
-            # diff1 = L1 norm of 1-step evolved row1 minus itself
-            diff1 = self.L1_norm_of_single_step_change(row1)
-            # diff2 = L1 norm of 1-step evolved row2 minus itself
-            diff2 = self.L1_norm_of_single_step_change(row2)
-            # sum1 = sum of row1, which should be 1.0
-            sum1 = float(xp.sum(row1))
-            # sum2 = sum of row2, which should be 1.0
-            sum2 = float(xp.sum(row2))
+            sum_absolute_diff = float(xp.linalg.norm(p_max - p_min, ord=1))
+            # sum_min = sum of minimum probs, which should be below 1.0
+            sum_min = float(p_min.sum())
+            # sum_max = sum max probs, which could be above or below 1.0
+            sum_max = float(p_max.sum())
             diags["sad"].append(sum_absolute_diff)
             diags["power"].append(power)
-            diags["diff1"].append(diff1)
-            diags["diff2"].append(diff2)
-            diags["sum1minus1"].append(sum1 - 1.0)
-            diags["sum2minus1"].append(sum2 - 1.0)
+            diags["sum_max"].append(sum_max)
+            diags["sum_min"].append(sum_min)
             unconverged = sum_absolute_diff > tolerance
             if not unconverged:
                 # these extra steps are taken when there is a possible solution
@@ -313,8 +302,8 @@ class MarkovChainCPUGPU:
                     self.stationary_distribution
                 )
                 unconverged = self.check_norm > tolerance
-        zrow = row1 if ((row1==0.0).sum())>((row2==0.0).sum()) else row2
-        elements_to_zero = (zrow==0.0) & (self.stationary_distribution < tolerance)
+        max_element = self.stationary_distribution==(self.stationary_distribution.max())
+        elements_to_zero = (cP_LT[max_element,:][0,:]==0.) & (self.stationary_distribution < tolerance)
         if (xp.any(elements_to_zero)):
             zeroed_stationary_distribution = xp.copy(self.stationary_distribution)
             zeroed_stationary_distribution[elements_to_zero]=0.0
