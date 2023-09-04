@@ -320,7 +320,10 @@ class MarkovChainCPUGPU:
                 zeroed_stationary_distribution
             )
             diags["zeroed_check_norm_improvement"] = self.check_norm-zeroed_check_norm
-            if (zeroed_check_norm <= self.check_norm):
+            # PB 09.04.2023 One goal of this code is to identify top cycles if they exist...
+            # so if the check norm of the stationary distribution with zeroes is OK, use it
+            # don't require that it is better than the check norm of the averaged distribution
+            if (zeroed_check_norm <= tolerance):
                 diags["averaged"] = False
                 self.stationary_distribution = zeroed_stationary_distribution
                 self.check_norm = zeroed_check_norm
