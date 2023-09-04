@@ -273,7 +273,9 @@ class MarkovChainCPUGPU:
             "sum_min_minus_1": [],
             "sum_max_minus_1": [],
             "sad": [],
-            "averaged": None
+            "averaged": None,
+            "first_index_at_max_prob": None,
+            "zeroes_on_max_prob_row": None
         }
         while unconverged:
             P_power = xp.linalg.matrix_power(P_power, 2)
@@ -306,8 +308,10 @@ class MarkovChainCPUGPU:
         # if we have a candidate, check the element that has the maximum probability
         # and see if the corresponding row of P^power has zeroes.  These are unreached alternatives
         # then check to see which distribution has a better L1 norm of single step change
-        first_index_at_max_prob = xp.argmax(self.stationary_distribution)
+        first_index_at_max_prob = int(xp.argmax(self.stationary_distribution))
+        diags["first_index_at_max_prob"] = first_index_at_max_prob
         mle_row = xp.copy(P_power[first_index_at_max_prob,:])
+        diags["zeroes_on_max_prob_row"] = int((mle_row==0.).sum())
         elements_to_zero = (mle_row==0.) & (self.stationary_distribution < tolerance)
         if (xp.any(elements_to_zero)):
             zeroed_stationary_distribution = mle_row
