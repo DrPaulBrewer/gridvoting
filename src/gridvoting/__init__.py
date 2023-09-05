@@ -256,67 +256,92 @@ class MarkovChainCPUGPU:
         Q[0] = xp.ones(n)
         b = xp.zeros(n)
         b[0] = 1.0
-        self.unit_eigenvector = xp.linalg.solve(Q, b)
+        error_unable_msg = "unable to find unique unit eigenvector "
+        try:
+            self.unit_eigenvector = xp.linalg.solve(Q, b)
+        except Exception as err:
+            warn(str(err)) # print the original exception lest it be lost for debugging purposes
+            raise RuntimeError(error_unable_msg+"(solver)")
+        if xp.isnan(self.unit_eigenvector.sum()):
+            raise RuntimeError(error_unable_msg+"(nan)")
+        if xp.any(self.unit_eigenvector<0.0):
+            raise RuntimeError(error_unable_msg+"(negative components)")
         return self.unit_eigenvector
 
-    def find_unique_stationary_distribution(self, *, tolerance, start_power=2):
+    def find_unique_stationary_distribution(self, *, tolerance, start_power=2, stop_power=65536):
         """finds the stationary distribution for a Markov Chain by
         taking a sufficiently high power of the transition matrix"""
         if xp.any(self.absorbing_points):
             self.stationary_distribution = None
             return None
         unconverged = True
-        check1 = 0  # upper left when P is from a grid
-        check2 = int(self.P.shape[0] / 2)  # center when P is from a grid
         power = start_power
-        cP = self.P
-        cP_LT = xp.linalg.matrix_power(cP, start_power)
+        P_power = xp.linalg.matrix_power(self.P, start_power)
         diags = {
             "power": [],
-            "sum1minus1": [],
-            "sum2minus1": [],
+            "sum_min_minus_1": [],
+            "sum_max_minus_1": [],
             "sad": [],
-            "diff1": [],
-            "diff2": [],
+            "averaged": None,
+            "first_index_at_max_prob": None,
+            "zeroes_on_max_prob_row": None,
+            "zeroed_check_norm_improvement": None
         }
         while unconverged:
-            cP_LT = xp.linalg.matrix_power(cP_LT, 2)
+            if power>=stop_power:
+                del P_power
+                raise(RuntimeError("Unable to find unique stationary distribution with power method; power="+str(power)))
+            P_power = xp.linalg.matrix_power(P_power, 2)
             power = power * 2
-            row1 = cP_LT[check1]
-            row2 = cP_LT[check2]
+            p_min = P_power.min(axis=0)
+            p_max = P_power.max(axis=0)
             # cast to float is required because cp.sum yields a cp.cparray
             # with zero dimensions instead of a scalar
             #
-            # sum_..._ces = L1 norm of two different rows of P^power
-            sum_absolute_diff = float(xp.linalg.norm(row1 - row2, ord=1))
-            # diff1 = L1 norm of 1-step evolved row1 minus itself
-            diff1 = self.L1_norm_of_single_step_change(row1)
-            # diff2 = L1 norm of 1-step evolved row2 minus itself
-            diff2 = self.L1_norm_of_single_step_change(row2)
-            # sum1 = sum of row1, which should be 1.0
-            sum1 = float(xp.sum(row1))
-            # sum2 = sum of row2, which should be 1.0
-            sum2 = float(xp.sum(row2))
+            sum_absolute_diff = float(xp.linalg.norm(p_max - p_min, ord=1))
+            # sum_min = sum of minimum probs, which should be below 1.0
+            sum_min = float(p_min.sum())
+            # sum_max = sum max probs, which could be above or below 1.0
+            sum_max = float(p_max.sum())
             diags["sad"].append(sum_absolute_diff)
             diags["power"].append(power)
-            diags["diff1"].append(diff1)
-            diags["diff2"].append(diff2)
-            diags["sum1minus1"].append(sum1 - 1.0)
-            diags["sum2minus1"].append(sum2 - 1.0)
+            diags["sum_max_minus_1"].append(sum_max-1.0)
+            diags["sum_min_minus_1"].append(sum_min-1.0)
             unconverged = sum_absolute_diff > tolerance
             if not unconverged:
                 # these extra steps are taken when there is a possible solution
-                # use an average over all the rows to collapse cp_LT
-                self.stationary_distribution = xp.average(cP_LT, axis=0)
+                # use an average over all the rows to collapse P_power
+                self.stationary_distribution = xp.average(P_power, axis=0)
+                diags["averaged"] = True
                 # double check the solution via an L1 norm
                 self.check_norm = self.L1_norm_of_single_step_change(
                     self.stationary_distribution
                 )
                 unconverged = self.check_norm > tolerance
-
+        # if we have a candidate, check the element that has the maximum probability
+        # and see if the corresponding row of P^power has zeroes.  These are unreached alternatives
+        # then check to see which distribution has a better L1 norm of single step change
+        first_index_at_max_prob = int(xp.argmax(self.stationary_distribution))
+        diags["first_index_at_max_prob"] = first_index_at_max_prob
+        mle_row = xp.copy(P_power[first_index_at_max_prob,:])
+        diags["zeroes_on_max_prob_row"] = int((mle_row==0.).sum())
+        elements_to_zero = (mle_row==0.) & (self.stationary_distribution < tolerance)
+        if (xp.any(elements_to_zero)):
+            zeroed_stationary_distribution = mle_row
+            zeroed_check_norm = self.L1_norm_of_single_step_change(
+                zeroed_stationary_distribution
+            )
+            diags["zeroed_check_norm_improvement"] = self.check_norm-zeroed_check_norm
+            # PB 09.04.2023 One goal of this code is to identify top cycles if they exist...
+            # so if the check norm of the stationary distribution with zeroes is OK, use it
+            # don't require that it is better than the check norm of the averaged distribution
+            if (zeroed_check_norm <= tolerance):
+                diags["averaged"] = False
+                self.stationary_distribution = zeroed_stationary_distribution
+                self.check_norm = zeroed_check_norm
         self.power = power
         self.power_method_diagnostics = diags
-        del cP_LT
+        del P_power
         return self.stationary_distribution
 
     def L1_norm_comparing_stationary_distributions(self,*,other):
