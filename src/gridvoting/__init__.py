@@ -289,6 +289,7 @@ class MarkovChainCPUGPU:
         }
         while unconverged:
             if power>=stop_power:
+                del P_power
                 raise(RuntimeError("Unable to find unique stationary distribution with power method; power="+str(power)))
             P_power = xp.linalg.matrix_power(P_power, 2)
             power = power * 2
