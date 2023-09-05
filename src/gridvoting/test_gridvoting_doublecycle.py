@@ -18,7 +18,7 @@ def double_cycle_mc():
   
 def test_gridvoting_doublecycle_power(double_cycle_mc):
   with pytest.raises(RuntimeError) as e_info:
-    double_cycle_mc.find_unique_stationary_distribution()
+    double_cycle_mc.find_unique_stationary_distribution(tolerance=1e-10)
 
 def test_gridvoting_doublecycle_algebra(double_cycle_mc):
   with pytest.raises(RuntimeError) as e_info:
