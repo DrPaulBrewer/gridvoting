@@ -1,6 +1,7 @@
-import gridvoting as gv
-from itertools import permutations
+import pytest
 def test_gridvoting_topcycle():
+  import gridvoting as gv
+  from itertools import permutations
   np = gv.np
   xp = gv.xp
   for perm in permutations(np.arange(6)):
