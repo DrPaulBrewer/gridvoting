@@ -256,10 +256,19 @@ class MarkovChainCPUGPU:
         Q[0] = xp.ones(n)
         b = xp.zeros(n)
         b[0] = 1.0
-        self.unit_eigenvector = xp.linalg.solve(Q, b)
+        error_unable_msg = "unable to find unique unit eigenvector "
+        try:
+            self.unit_eigenvector = xp.linalg.solve(Q, b)
+        except Exception as err:
+            warn(str(err)) # print the original exception lest it be lost for debugging purposes
+            raise RuntimeError(error_unable_msg+"(solver)")
+        if xp.isnan(self.unit_eigenvector.sum()):
+            raise RuntimeError(error_unable_msg+"(nan)")
+        if xp.any(self.unit_eigenvector<0.0):
+            raise RuntimeError(error_unable_msg+"(negative components)")
         return self.unit_eigenvector
 
-    def find_unique_stationary_distribution(self, *, tolerance, start_power=2):
+    def find_unique_stationary_distribution(self, *, tolerance, start_power=2, stop_power=65536):
         """finds the stationary distribution for a Markov Chain by
         taking a sufficiently high power of the transition matrix"""
         if xp.any(self.absorbing_points):
@@ -279,6 +288,8 @@ class MarkovChainCPUGPU:
             "zeroed_check_norm_improvement": None
         }
         while unconverged:
+            if power>=stop_power:
+                raise(RuntimeError("Unable to find unique stationary distribution with power method; power="+str(power)))
             P_power = xp.linalg.matrix_power(P_power, 2)
             power = power * 2
             p_min = P_power.min(axis=0)
